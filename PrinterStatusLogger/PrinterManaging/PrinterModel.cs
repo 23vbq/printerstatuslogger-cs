@@ -21,7 +21,7 @@ namespace PrinterStatusLogger.PrinterManaging
         public int ReadTonerLevelFromResponse(string http_response)
         {
             //return ReadTonerLevelFunction.Invoke(http_response);
-            Match m = Regex.Match("port = 34", ReadTonerLevelRegex);
+            Match m = Regex.Match(http_response, ReadTonerLevelRegex);
             if (!m.Success)
                 throw new Exception("Toner level not found.");
             return Int32.Parse(m.Value);

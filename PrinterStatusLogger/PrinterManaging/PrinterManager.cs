@@ -13,7 +13,7 @@ namespace PrinterStatusLogger.PrinterManaging
             _printers = new List<Printer>();
 
             RegisterPrinterModels();
-            Printer test = new Printer("Fajna taka", "https://zetcode.com/csharp/httpclient/", _printerModels[0]);
+            /*Printer test = new Printer("Fajna taka", "https://zetcode.com/csharp/httpclient/", _printerModels[0]);
             int t1 = -1;
             try
             {
@@ -23,9 +23,22 @@ namespace PrinterStatusLogger.PrinterManaging
                 Console.WriteLine(ex.ToString());
                 return;
             }
-            Console.WriteLine(t1);
+            Console.WriteLine(t1);*/
         }
 
+        public void AddPrinter(string name, string address, int modelId)
+        {
+            PrinterModel model = FindModel(modelId);
+            if (model == null)
+                throw new Exception("Invalid model");
+            _printers.Add(new Printer(name, address, model));
+        }
+        private PrinterModel FindModel(int id)
+        {
+            foreach (PrinterModel model in _printerModels)
+                if (model.Id == id) return model;
+            return null;
+        }
         private void RegisterPrinterModels()
         {
             PrinterModel model;

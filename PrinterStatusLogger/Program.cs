@@ -1,4 +1,5 @@
 ﻿using PrinterStatusLogger.CommandHandling;
+using PrinterStatusLogger.Config;
 using PrinterStatusLogger.PrinterManaging;
 
 namespace PrinterStatusLogger
@@ -22,7 +23,17 @@ namespace PrinterStatusLogger
             }
             commandHandler.Handle(args);*/
             PrinterManager printerManager = new PrinterManager();
-            printerManager.ListPrinterModels();
+            ConfigManager configManager = new ConfigManager();
+            if (args.Length > 0 )
+            {
+                if (args[0] == "-m")
+                {
+                    printerManager.ListPrinterModels();
+                    return;
+                }
+            }
+            configManager.LoadPrinters(printerManager);
+            Console.ReadLine();
         }
     }
 }
