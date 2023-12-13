@@ -13,17 +13,6 @@ namespace PrinterStatusLogger.PrinterManaging
             _printers = new List<Printer>();
 
             RegisterPrinterModels();
-            /*Printer test = new Printer("Fajna taka", "https://zetcode.com/csharp/httpclient/", _printerModels[0]);
-            int t1 = -1;
-            try
-            {
-                t1 = test.GetTonerLevel();
-            } catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return;
-            }
-            Console.WriteLine(t1);*/
         }
 
         public void AddPrinter(string name, string address, int modelId)
@@ -42,17 +31,6 @@ namespace PrinterStatusLogger.PrinterManaging
         private void RegisterPrinterModels()
         {
             PrinterModel model;
-            /*model = new PrinterModel(0, "Elegancka drukarka", (c) =>
-            {
-                int r = -1;
-                Match m = Regex.Match(c, @"/(?<=port = )[0-9]{2}/g");
-                Console.WriteLine(m.Success ? 1 : 0); // FIXME nie działa
-                if (m.Success)
-                {
-                    Int32.TryParse(m.Value, out r );
-                }
-                return r;
-            });*/
             model = new PrinterModel(0, "Elegancka drukarka", @"(?<=port = )[0-9]{2}");
             _printerModels.Add(model);
         }
