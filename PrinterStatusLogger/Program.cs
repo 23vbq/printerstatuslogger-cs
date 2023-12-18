@@ -23,6 +23,7 @@ namespace PrinterStatusLogger
                 return;
             }
             commandHandler.Handle(args);*/
+            Logger.Log(LogType.INFO, "PrinterStatusLogger v0.1 " + args.ToString());
             PrinterManager printerManager = new PrinterManager();
             ConfigManager configManager = new ConfigManager();
             if (args.Length > 0 )
@@ -39,9 +40,7 @@ namespace PrinterStatusLogger
             }
             configManager.LoadPrinters(printerManager);
             Logger.Log(LogType.INFO, "Starting printers scan");
-            //Console.WriteLine("Name\tToner Level");
             printerManager.RunPrinterScan();
-            Console.ReadLine();
         }
     }
 }

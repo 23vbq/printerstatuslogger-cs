@@ -31,7 +31,6 @@
                 Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + "\tSomething goes wrong");
                 return -3;
             }
-            //Console.WriteLine(content);
             return Model.ReadTonerLevelFromResponse(content);
         }
         private string? GetPrinterWebInterface()

@@ -10,7 +10,6 @@ namespace PrinterStatusLogger.Config
         public void LoadPrinters(PrinterManager manager)
         {
             if (!configExists(_printersConfigFilename)){
-                Console.WriteLine("Printers config not found!");
                 Logger.Log(LogType.WARNING, "Printers config not found");
                 if (Program.userMode && AskCreatingDefaultConfig())
                 {
@@ -23,7 +22,10 @@ namespace PrinterStatusLogger.Config
             ReadConfig(_printersConfigFilename, (args) =>
             {
                 if (args.Length != 3)
+                {
+                    Logger.Log(LogType.ERROR, ""); // TODO dokonczyc
                     return false;
+                }
                 manager.AddPrinter(args[0], args[1], Int32.Parse(args[2])); // TODO handle invalid parse
                 return true;
             });
@@ -51,7 +53,7 @@ namespace PrinterStatusLogger.Config
                         loaded++;
                 }
             }
-            Console.WriteLine("Loaded objects form config: " + loaded);
+            Logger.Log(LogType.INFO, "Loaded objects form config: " + loaded);
         }
         private void CreateConfigFile(string filename)
         {
