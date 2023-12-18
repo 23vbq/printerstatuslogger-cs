@@ -1,4 +1,5 @@
 ﻿using PrinterStatusLogger.PrinterManaging;
+using System.Security.Cryptography;
 
 namespace PrinterStatusLogger.Config
 {
@@ -10,8 +11,14 @@ namespace PrinterStatusLogger.Config
         {
             if (!configExists(_printersConfigFilename)){
                 Console.WriteLine("Printers config not found!");
-                CreateConfigFile(_printersConfigFilename);
-                Console.WriteLine("Created config file");
+                Logger.Log(LogType.WARNING, "Printers config not found");
+                if (Program.userMode && AskCreatingDefaultConfig())
+                {
+                    CreateConfigFile(_printersConfigFilename);
+                    Logger.Log(LogType.INFO, "File " + _printersConfigFilename + " created at " + Path.GetFullPath(Path.Combine("Config", _printersConfigFilename)));
+                }
+                else
+                    throw new Exception("Config file not found");
             }
             ReadConfig(_printersConfigFilename, (args) =>
             {
@@ -39,7 +46,7 @@ namespace PrinterStatusLogger.Config
                         continue;
                     if (line.Length < 1)
                         continue;
-                    string[] args = line.Split(' '); // TODO log below invalid cases
+                    string[] args = line.Split('\t'); // TODO log below invalid cases
                     if (function.Invoke(args))
                         loaded++;
                 }
@@ -54,6 +61,19 @@ namespace PrinterStatusLogger.Config
             {
                 sw.WriteLine("Default");
             }
+        }
+        private bool AskCreatingDefaultConfig()
+        {
+            Console.Write("Do you want to create default config file? (y/n) : ");
+            ConsoleKeyInfo key;
+            while (true)
+            {
+                key = Console.ReadKey();
+                if (key.Key == ConsoleKey.Y || key.Key == ConsoleKey.N)
+                    break;
+                Console.Write("\nInvalid option. (y/n) : ");
+            }
+            return key.Key == ConsoleKey.Y;
         }
 
         private bool configExists(string filename)

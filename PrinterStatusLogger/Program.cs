@@ -7,6 +7,7 @@ namespace PrinterStatusLogger
     internal class Program
     {
         public static bool exitCalled = false;
+        public static bool userMode = true;
 
         static void Main(string[] args)
         {
@@ -26,13 +27,20 @@ namespace PrinterStatusLogger
             ConfigManager configManager = new ConfigManager();
             if (args.Length > 0 )
             {
-                if (args[0] == "-m")
+                if (args.Contains("-u"))
+                {
+                    userMode = true;
+                }
+                if (args.Contains("-m"))
                 {
                     printerManager.ListPrinterModels();
                     return;
                 }
             }
             configManager.LoadPrinters(printerManager);
+            Logger.Log(LogType.INFO, "Starting printers scan");
+            //Console.WriteLine("Name\tToner Level");
+            printerManager.RunPrinterScan();
             Console.ReadLine();
         }
     }

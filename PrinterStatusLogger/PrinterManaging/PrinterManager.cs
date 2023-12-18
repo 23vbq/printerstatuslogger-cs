@@ -32,6 +32,7 @@ namespace PrinterStatusLogger.PrinterManaging
         {
             PrinterModel model;
             model = new PrinterModel(0, "Elegancka drukarka", @"(?<=port = )[0-9]{2}");
+            model = new PrinterModel(1, "Elegancka drukarka", "(?<=<h1 id=\"trundeid\">)[0-9]{2}(?=%</h1>)");
             _printerModels.Add(model);
         }
 
@@ -42,6 +43,15 @@ namespace PrinterStatusLogger.PrinterManaging
             foreach (PrinterModel model in _printerModels)
             {
                 Console.WriteLine(model.Id + "\t" +  model.Name);
+            }
+        }
+        public void RunPrinterScan()
+        {
+            foreach(Printer p in _printers)
+            {
+                int tonerlevel = p.GetTonerLevel();
+                Logger.Log(p, tonerlevel);
+                //Console.WriteLine(p.Name + "\t" + tonerlevel);
             }
         }
     }
