@@ -13,6 +13,11 @@ namespace PrinterStatusLogger
     {
         private static StreamWriter _logfileout;
         private static string logbuffer;
+        private static Dictionary<LogType, ConsoleColor> logcolor = new Dictionary<LogType, ConsoleColor>()
+        {
+            {LogType.ERROR, ConsoleColor.DarkRed },
+            {LogType.WARNING, ConsoleColor.Yellow }
+        };
 
         static Logger()
         {
@@ -29,6 +34,7 @@ namespace PrinterStatusLogger
         public static void Log(LogType type, string message)
         {
             logbuffer = DateTime.Now.ToString("HH:mm:ss dd/MM/yyyy") + " [" + type.ToString() + "] " + message;
+            SetConsoleColor(type);
             Console.WriteLine(logbuffer);
             _logfileout.WriteLine(logbuffer);
         }
@@ -40,6 +46,15 @@ namespace PrinterStatusLogger
         public static void Log(Printer printer, int tonerLevel)
         {
             Log(LogType.PRNT_INFO, printer.Address + " Toner: " +  tonerLevel);
+        }
+        private static void SetConsoleColor(LogType type)
+        {
+            if (!logcolor.ContainsKey(type))
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+                return;
+            }
+            Console.ForegroundColor = logcolor[type];
         }
     }
 }

@@ -22,10 +22,7 @@ namespace PrinterStatusLogger.Config
             ReadConfig(_printersConfigFilename, (args) =>
             {
                 if (args.Length != 3)
-                {
-                    Logger.Log(LogType.ERROR, ""); // TODO dokonczyc
                     return false;
-                }
                 manager.AddPrinter(args[0], args[1], Int32.Parse(args[2])); // TODO handle invalid parse
                 return true;
             });
@@ -38,12 +35,15 @@ namespace PrinterStatusLogger.Config
         /// <param name="function">Function to perform on loaded line data</param>
         private void ReadConfig(string filename, Func<string[], bool> function)
         {
+            Logger.Log(LogType.INFO, "Reading config file: " + filename);
             string line;
             int loaded = 0;
             using (StreamReader sr = new StreamReader(Path.Combine("Config", filename)))
             {
+                int n = 0;
                 while ((line = sr.ReadLine()) != null)
                 {
+                    n++;
                     if (line.StartsWith('#'))
                         continue;
                     if (line.Length < 1)
@@ -51,6 +51,8 @@ namespace PrinterStatusLogger.Config
                     string[] args = line.Split('\t'); // TODO log below invalid cases
                     if (function.Invoke(args))
                         loaded++;
+                    else
+                        Logger.Log(LogType.ERROR, "Invalid arguments in " + filename + " at line " + n);
                 }
             }
             Logger.Log(LogType.INFO, "Loaded objects form config: " + loaded);

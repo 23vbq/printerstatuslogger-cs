@@ -32,6 +32,7 @@ namespace PrinterStatusLogger.PrinterManaging
         {
             PrinterModel model;
             model = new PrinterModel(0, "Elegancka drukarka", @"(?<=port = )[0-9]{2}");
+            _printerModels.Add(model);
             model = new PrinterModel(1, "Elegancka drukarka", "(?<=<h1 id=\"trundeid\">)[0-9]{2}(?=%</h1>)");
             _printerModels.Add(model);
         }
