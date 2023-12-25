@@ -33,7 +33,7 @@ namespace PrinterStatusLogger
         /// <param name="message"></param>
         public static void Log(LogType type, string message)
         {
-            logbuffer = DateTime.Now.ToString("HH:mm:ss dd/MM/yyyy") + " [" + type.ToString() + "] " + message;
+            logbuffer = BuildLog(type, message);
             SetConsoleColor(type);
             Console.WriteLine(logbuffer);
             _logfileout.WriteLine(logbuffer);
@@ -46,6 +46,10 @@ namespace PrinterStatusLogger
         public static void Log(Printer printer, int tonerLevel)
         {
             Log(LogType.PRNT_INFO, printer.Address + " Toner: " +  tonerLevel);
+        }
+        public static string BuildLog(LogType type, string message)
+        {
+            return DateTime.Now.ToString("HH:mm:ss dd/MM/yyyy") + " [" + type.ToString() + "] " + message;
         }
         private static void SetConsoleColor(LogType type)
         {

@@ -52,6 +52,7 @@ namespace PrinterStatusLogger.PrinterManaging
             {
                 int tonerlevel = p.GetTonerLevel();
                 Logger.Log(p, tonerlevel);
+                Alerter.Handler(p, tonerlevel);
             }
             Logger.Log(LogType.INFO, "Scan ended");
         }
