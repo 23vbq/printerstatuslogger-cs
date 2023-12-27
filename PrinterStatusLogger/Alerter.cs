@@ -74,8 +74,8 @@ namespace PrinterStatusLogger
                 return;
             }
             MailMessage message = new MailMessage();
-            message.From = new MailAddress("***REMOVED***");
-            message.To.Add("***REMOVED***");
+            message.From = new MailAddress(_credential.UserName);
+            message.To.Add("****"); // TODO In config file
             message.IsBodyHtml = true;
             message.Subject = "PrinterStatusLogger " + DateTime.Now.ToString("HH:mm:ss dd/MM/yyyy");
             StringBuilder sb = new StringBuilder();
