@@ -1,7 +1,10 @@
-﻿using PrinterStatusLogger.PrinterManaging;
+﻿using PrinterStatusLogger.Config;
+using PrinterStatusLogger.PrinterManaging;
 using System.Net;
 using System.Net.Mail;
+using System.Security;
 using System.Text;
+using Windows.Security.Credentials;
 
 namespace PrinterStatusLogger
 {
@@ -21,6 +24,7 @@ namespace PrinterStatusLogger
 
         public static readonly int minTonerLevel = 90;
 
+        private static bool Initialized = false;
         private static SmtpClient _smtpClient;
         private static NetworkCredential _credential;
         private static bool _errorBit;
@@ -29,14 +33,25 @@ namespace PrinterStatusLogger
 
         static Alerter()
         {
-            _smtpClient = new SmtpClient("smtp.gmail.com", 587);
+            _smtpClient = new SmtpClient("smtp.gmail.com", 587); // TODO Server in config, better config itd.
             _smtpClient.EnableSsl = true;
-            _credential = new NetworkCredential("***REMOVED***", "***REMOVED***"); //***REMOVED***
             _smtpClient.UseDefaultCredentials = false;
-            _smtpClient.Credentials = _credential;
+            _credential = new NetworkCredential();
             _errorBit = false;
 
             _alertBuffer = new List<AlertPrinterObj>();
+        }
+        public static void Initialize(PasswordCredential pc)
+        {
+            if (pc == null)
+            {
+                Logger.Log(LogType.ERROR, "Cannot initialize Alerter: Credentials is null");
+                return;
+            }
+            pc.RetrievePassword();
+            _credential = new NetworkCredential(pc.UserName, pc.Password);
+            _smtpClient.Credentials = _credential;
+            Initialized = true;
         }
 
         public static void Handler(Printer printer, int tonerLevel)
@@ -48,9 +63,15 @@ namespace PrinterStatusLogger
 
         public static void Send()
         {
+            if (!Initialized)
+            {
+                Logger.Log(LogType.ERROR, "Alerter not initialized");
+                return;
+            }
             if (_errorBit)
             {
                 Logger.Log(LogType.WARNING, "Alerter error bit is set, skipping sending...");
+                return;
             }
             MailMessage message = new MailMessage();
             message.From = new MailAddress("***REMOVED***");

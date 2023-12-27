@@ -1,5 +1,7 @@
 ﻿using PrinterStatusLogger.PrinterManaging;
-using System.Security.Cryptography;
+using System.Net;
+using Windows.Security.Credentials;
+using Windows.Security.Credentials.UI;
 
 namespace PrinterStatusLogger.Config
 {
@@ -11,7 +13,7 @@ namespace PrinterStatusLogger.Config
         {
             if (!configExists(_printersConfigFilename)){
                 Logger.Log(LogType.WARNING, "Printers config not found");
-                if (Program.userMode && AskCreatingDefaultConfig())
+                if (Program.userMode && Ask("Do you want to create default config file?"))
                 {
                     CreateConfigFile(_printersConfigFilename);
                     Logger.Log(LogType.INFO, "File " + _printersConfigFilename + " created at " + Path.GetFullPath(Path.Combine("Config", _printersConfigFilename)));
@@ -26,6 +28,48 @@ namespace PrinterStatusLogger.Config
                 manager.AddPrinter(args[0], args[1], Int32.Parse(args[2])); // TODO handle invalid parse
                 return true;
             });
+        }
+        /*public void LoadAlerterCreds()
+        {
+            PasswordVault vault = new PasswordVault();
+            //vault.Add(new PasswordCredential("asdf", "asdf", "adsf"));
+            var credList = vault.RetrieveAll();
+            if (credList.Count < 1) 
+                throw new Exception("Alerter Credentials not found");
+            PasswordCredential pc = credList[0];
+            pc.RetrievePassword();
+            Alerter.Initialize(pc.UserName, pc.Sec);
+        }*/
+        public PasswordCredential? GetAlerterCreds()
+        {
+            PasswordVault vault = new PasswordVault();
+            IReadOnlyList<PasswordCredential>? credList = null;
+            try
+            {
+                credList = vault.FindAllByResource("PrinterStatusLogger_Alerter");
+            } catch (Exception ex)
+            {
+                Logger.Log(LogType.WARNING, "Alerter Credentials not found");
+            }
+            if (credList == null || credList.Count == 0)
+            {
+                if (Program.userMode && Ask("Do you want to set credentials for Alerter?"))
+                {
+                    SetAlerterCreds(vault);
+                    return GetAlerterCreds();
+                }
+                else
+                    return null;
+            }
+            return credList[0];
+        }
+        private void SetAlerterCreds(PasswordVault vault)
+        {
+            Console.WriteLine("Username: ");
+            string un = Console.ReadLine();
+            Console.WriteLine("Password: ");
+            string pass = Console.ReadLine();
+            vault.Add(new PasswordCredential("PrinterStatusLogger_Alerter", un, pass));
         }
         /// <summary>
         /// Reads lines from file and splits by space.
@@ -66,9 +110,9 @@ namespace PrinterStatusLogger.Config
                 sw.WriteLine("Default");
             }
         }
-        private bool AskCreatingDefaultConfig()
+        private bool Ask(string question)
         {
-            Console.Write("Do you want to create default config file? (y/n) : ");
+            Console.Write(question + " (y/n) : ");
             ConsoleKeyInfo key;
             while (true)
             {
