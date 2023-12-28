@@ -1,0 +1,6 @@
+# Smtp Server
+server=smtp.domain.xyz
+# Smtp port
+port=587
+# Message Recipients (comma-separated)
+recipients=defefault@domain.xyz

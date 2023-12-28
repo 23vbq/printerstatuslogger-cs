@@ -8,6 +8,7 @@ namespace PrinterStatusLogger.Config
     public class ConfigManager
     {
         private readonly string _printersConfigFilename = "printers.cfg";
+        private readonly string _alerterConfigFilename = "alerter.cfg";
 
         public void LoadPrinters(PrinterManager manager)
         {
@@ -21,12 +22,54 @@ namespace PrinterStatusLogger.Config
                 else
                     throw new Exception("Config file not found");
             }
-            ReadConfig(_printersConfigFilename, (args) =>
+            ReadConfig(_printersConfigFilename, (line) =>
             {
+                string[] args = line.Split('\t');
                 if (args.Length != 3)
                     return false;
                 manager.AddPrinter(args[0], args[1], Int32.Parse(args[2])); // TODO handle invalid parse
                 return true;
+            });
+        }
+        public void LoadAlerter()
+        {
+            if (!configExists(_alerterConfigFilename))
+            {
+                Logger.Log(LogType.WARNING, "Alerter config not found");
+                if (Program.userMode && Ask("Do you want to create default config file?"))
+                {
+                    CreateConfigFile(_alerterConfigFilename);
+                    Logger.Log(LogType.INFO, "File " + _alerterConfigFilename + " created at " + Path.GetFullPath(Path.Combine("Config", _alerterConfigFilename)));
+                }
+                else
+                    throw new Exception("Config file not found");
+            }
+            ReadConfig(_alerterConfigFilename, (line) =>
+            {
+                string[] args = line.Split('=', 2);
+                if (args[0] == "server")
+                {
+                    Alerter.SmtpServer = args[1];
+                    return true;
+                }
+                if (args[0] == "port")
+                {
+                    try
+                    {
+                        Alerter.SmtpPort = Int32.Parse(args[1]);
+                        return true;
+                    } catch (Exception ex)
+                    {
+                        Logger.Log(LogType.ERROR, ex.Message);
+                        return false;
+                    }
+                }
+                if (args[0] == "recipients")
+                {
+                    Alerter.MessageRecipients = args[1];
+                    return true;
+                }
+                return false;
             });
         }
         /*public void LoadAlerterCreds()
@@ -77,7 +120,7 @@ namespace PrinterStatusLogger.Config
         /// </summary>
         /// <param name="filename">Name of file to read</param>
         /// <param name="function">Function to perform on loaded line data</param>
-        private void ReadConfig(string filename, Func<string[], bool> function)
+        private void ReadConfig(string filename, Func<string, bool> function)
         {
             Logger.Log(LogType.INFO, "Reading config file: " + filename);
             string line;
@@ -92,11 +135,11 @@ namespace PrinterStatusLogger.Config
                         continue;
                     if (line.Length < 1)
                         continue;
-                    string[] args = line.Split('\t'); // TODO log below invalid cases
-                    if (function.Invoke(args))
+                     // TODO log below invalid cases
+                    if (function.Invoke(line))
                         loaded++;
                     else
-                        Logger.Log(LogType.ERROR, "Invalid arguments in " + filename + " at line " + n);
+                        Logger.Log(LogType.ERROR, "Invalid setting in " + filename + " at line " + n);
                 }
             }
             Logger.Log(LogType.INFO, "Loaded objects form config: " + loaded);
@@ -107,7 +150,7 @@ namespace PrinterStatusLogger.Config
                 Directory.CreateDirectory("Config");
             using (StreamWriter sw = File.CreateText(Path.Combine("Config", filename)))
             {
-                sw.WriteLine("Default");
+                sw.WriteLine("# Default");
             }
         }
         private bool Ask(string question)

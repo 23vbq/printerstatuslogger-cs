@@ -1,5 +1,6 @@
 ﻿using PrinterStatusLogger.Config;
 using PrinterStatusLogger.PrinterManaging;
+using System.Collections;
 using System.Net;
 using System.Net.Mail;
 using System.Security;
@@ -22,6 +23,10 @@ namespace PrinterStatusLogger
             }
         }
 
+        public static string SmtpServer = "";
+        public static int SmtpPort = -1;
+        public static string MessageRecipients = "";
+
         public static readonly int minTonerLevel = 90;
 
         private static bool Initialized = false;
@@ -41,7 +46,7 @@ namespace PrinterStatusLogger
 
             _alertBuffer = new List<AlertPrinterObj>();
         }
-        public static void Initialize(PasswordCredential pc)
+        public static void Initialize(PasswordCredential pc, Action loadAlerterConfig)
         {
             if (pc == null)
             {
@@ -51,7 +56,23 @@ namespace PrinterStatusLogger
             pc.RetrievePassword();
             _credential = new NetworkCredential(pc.UserName, pc.Password);
             _smtpClient.Credentials = _credential;
-            Initialized = true;
+
+            loadAlerterConfig.Invoke();
+            // Debug Info: Here is reversed, so 0x06 means {false, true, true}
+            BitArray settingcheck = new BitArray(
+            new bool[]{
+                SmtpServer != "",
+                SmtpPort != -1,
+                MessageRecipients != ""
+            });
+            byte[] code = new byte[1];
+            settingcheck.CopyTo(code, 0);
+            string hex = BitConverter.ToString(code);
+            Initialized = hex == "07";
+            if (!Initialized)
+            {
+                Logger.Log(LogType.ERROR, "Cannot initialize Alerter: Check code - 0x" + hex);
+            }
         }
 
         public static void Handler(Printer printer, int tonerLevel)
@@ -75,7 +96,7 @@ namespace PrinterStatusLogger
             }
             MailMessage message = new MailMessage();
             message.From = new MailAddress(_credential.UserName);
-            message.To.Add("****"); // TODO In config file
+            message.To.Add(MessageRecipients); // TODO In config file
             message.IsBodyHtml = true;
             message.Subject = "PrinterStatusLogger " + DateTime.Now.ToString("HH:mm:ss dd/MM/yyyy");
             StringBuilder sb = new StringBuilder();
