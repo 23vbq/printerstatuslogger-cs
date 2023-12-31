@@ -38,11 +38,20 @@ namespace PrinterStatusLogger
                     return;
                 }
             }
-            configManager.LoadPrinters(printerManager);
-            Alerter.Initialize(configManager.GetAlerterCreds(), configManager.LoadAlerter);
-            Logger.Log(LogType.INFO, "Starting printers scan");
-            printerManager.RunPrinterScan();
-            Alerter.Send();
+            try
+            {
+                configManager.LoadPrinterModels();
+                configManager.LoadPrinters(printerManager);
+                Alerter.Initialize(configManager.GetAlerterCreds(), configManager.LoadAlerter);
+                Logger.Log(LogType.INFO, "Starting printers scan");
+                printerManager.RunPrinterScan();
+                Alerter.Send();
+            } catch (Exception ex)
+            {
+                Logger.Log(LogType.ERROR, ex.Message);
+                Logger.Log(LogType.ERROR, "Fatal error! Aborting...");
+                Environment.Exit(1);
+            }
         }
     }
 }

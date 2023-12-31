@@ -13,12 +13,12 @@ namespace PrinterStatusLogger
     {
         public struct AlertPrinterObj
         {
-            public string Address;
+            public string Name;
             public int TonerLevel;
 
-            public AlertPrinterObj(string address, int tonerLevel)
+            public AlertPrinterObj(string name, int tonerLevel)
             {
-                Address = address;
+                Name = name;
                 TonerLevel = tonerLevel;
             }
         }
@@ -58,7 +58,7 @@ namespace PrinterStatusLogger
             _smtpClient.Credentials = _credential;
 
             loadAlerterConfig.Invoke();
-            // Debug Info: Here is reversed, so 0x06 means {false, true, true}
+            // Debug Info: Here is reversed, so 0x04 means {false, true, true}
             BitArray settingcheck = new BitArray(
             new bool[]{
                 SmtpServer != "",
@@ -67,6 +67,7 @@ namespace PrinterStatusLogger
             });
             byte[] code = new byte[1];
             settingcheck.CopyTo(code, 0);
+            //settingcheck.Not(); not working
             string hex = BitConverter.ToString(code);
             Initialized = hex == "07";
             if (!Initialized)
@@ -79,7 +80,7 @@ namespace PrinterStatusLogger
         {
             if (tonerLevel > minTonerLevel)
                 return;
-            _alertBuffer.Add(new AlertPrinterObj(printer.Address, tonerLevel));
+            _alertBuffer.Add(new AlertPrinterObj(printer.Name, tonerLevel));
         }
 
         public static void Send()
@@ -96,7 +97,7 @@ namespace PrinterStatusLogger
             }
             MailMessage message = new MailMessage();
             message.From = new MailAddress(_credential.UserName);
-            message.To.Add(MessageRecipients); // TODO In config file
+            message.To.Add(MessageRecipients);
             message.IsBodyHtml = true;
             message.Subject = "PrinterStatusLogger " + DateTime.Now.ToString("HH:mm:ss dd/MM/yyyy");
             StringBuilder sb = new StringBuilder();
@@ -117,10 +118,15 @@ namespace PrinterStatusLogger
         private static void AddPrinterTonerAlert(StringBuilder sb)
         {
             sb.Append("<b>Low toner level: </b><br>");
+            sb.Append("<table>");
+            sb.Append("<tr><th>Name</th><th>Toner Level</th></tr>");
             foreach (var x in _alertBuffer)
             {
-                sb.Append("&nbsp;&nbsp;" + Logger.BuildLog(LogType.PRNT_INFO, x.Address + " Toner: " + x.TonerLevel) + "<br>");
+                //sb.Append("&nbsp;&nbsp;" + Logger.BuildLog(LogType.PRNT_INFO, x.Name + " Toner: " + x.TonerLevel) + "<br>");
+                //sb.Append("&nbsp;&nbsp;" + x.Name + "&emps;" + "<br>");
+                sb.Append("<tr><td>" + x.Name + "</td><td>" + x.TonerLevel + "%</td></tr>");
             }
+            sb.Append("</table>");
         }
     }
 }

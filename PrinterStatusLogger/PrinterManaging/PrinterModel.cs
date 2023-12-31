@@ -4,13 +4,13 @@ namespace PrinterStatusLogger.PrinterManaging
 {
     public class PrinterModel
     {
-        public int Id { get; private set; }
+        public string Id { get; private set; }
         public string Name { get; private set; }
 
         //private Func<string, int> ReadTonerLevelFunction;
         private string ReadTonerLevelRegex;
 
-        public PrinterModel(int id, string name, string readtonerlevelregex) //Func<string, int> readtonerlevelfunction
+        public PrinterModel(string id, string name, string readtonerlevelregex) //Func<string, int> readtonerlevelfunction
         {
             Id = id;
             Name = name;

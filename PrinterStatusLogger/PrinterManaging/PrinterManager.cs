@@ -15,14 +15,14 @@ namespace PrinterStatusLogger.PrinterManaging
             RegisterPrinterModels();
         }
 
-        public void AddPrinter(string name, string address, int modelId)
+        public void AddPrinter(string name, string address, string modelId)
         {
             PrinterModel model = FindModel(modelId);
             if (model == null)
                 throw new Exception("Invalid model");
             _printers.Add(new Printer(name, address, model));
         }
-        private PrinterModel FindModel(int id)
+        private PrinterModel FindModel(string id)
         {
             foreach (PrinterModel model in _printerModels)
                 if (model.Id == id) return model;
@@ -31,9 +31,9 @@ namespace PrinterStatusLogger.PrinterManaging
         private void RegisterPrinterModels()
         {
             PrinterModel model;
-            model = new PrinterModel(0, "Elegancka drukarka", @"(?<=port = )[0-9]{2}");
+            model = new PrinterModel("T_001", "Elegancka drukarka", @"(?<=port = )[0-9]{2}");
             _printerModels.Add(model);
-            model = new PrinterModel(1, "Elegancka drukarka", "(?<=<h1 id=\"trundeid\">)[0-9]{2}(?=%</h1>)");
+            model = new PrinterModel("T_002", "Elegancka drukarka", "(?<=<h1 id=\"trundeid\">)[0-9]{2}(?=%</h1>)");
             _printerModels.Add(model);
         }
 

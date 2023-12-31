@@ -1,4 +1,5 @@
 ﻿using PrinterStatusLogger.PrinterManaging;
+using System.Collections;
 using System.Net;
 using Windows.Security.Credentials;
 using Windows.Security.Credentials.UI;
@@ -12,6 +13,7 @@ namespace PrinterStatusLogger.Config
 
         public void LoadPrinters(PrinterManager manager)
         {
+            string path = Path.Combine("Config", _printersConfigFilename);
             if (!configExists(_printersConfigFilename)){
                 Logger.Log(LogType.WARNING, "Printers config not found");
                 if (Program.userMode && Ask("Do you want to create default config file?"))
@@ -22,17 +24,18 @@ namespace PrinterStatusLogger.Config
                 else
                     throw new Exception("Config file not found");
             }
-            ReadConfig(_printersConfigFilename, (line) =>
+            ReadConfig(path, (line) =>
             {
                 string[] args = line.Split('\t');
                 if (args.Length != 3)
                     return false;
-                manager.AddPrinter(args[0], args[1], Int32.Parse(args[2])); // TODO handle invalid parse
+                manager.AddPrinter(args[0], args[1], args[2]); // TODO handle invalid parse
                 return true;
             });
         }
         public void LoadAlerter()
         {
+            string path = Path.Combine("Config", _alerterConfigFilename);
             if (!configExists(_alerterConfigFilename))
             {
                 Logger.Log(LogType.WARNING, "Alerter config not found");
@@ -44,7 +47,7 @@ namespace PrinterStatusLogger.Config
                 else
                     throw new Exception("Config file not found");
             }
-            ReadConfig(_alerterConfigFilename, (line) =>
+            ReadConfig(path, (line) =>
             {
                 string[] args = line.Split('=', 2);
                 if (args[0] == "server")
@@ -72,17 +75,72 @@ namespace PrinterStatusLogger.Config
                 return false;
             });
         }
-        /*public void LoadAlerterCreds()
+        /*
+         * Loading models
+         */
+        public void LoadPrinterModels()
         {
-            PasswordVault vault = new PasswordVault();
-            //vault.Add(new PasswordCredential("asdf", "asdf", "adsf"));
-            var credList = vault.RetrieveAll();
-            if (credList.Count < 1) 
-                throw new Exception("Alerter Credentials not found");
-            PasswordCredential pc = credList[0];
-            pc.RetrievePassword();
-            Alerter.Initialize(pc.UserName, pc.Sec);
-        }*/
+            string[] files;
+            try
+            {
+                files = GetPrinterModelConfigFiles();
+            } catch (Exception ex)
+            {
+                //Logger.Log(LogType.ERROR, ex.Message);
+                //throw new Exception("Fatal error");
+                throw ex;
+            }
+            int n = 0;
+            foreach (string file in files)
+            {
+                string id = "";
+                string name = "";
+                string readtonerlevelregex = "";
+                ReadConfig(file, (line) =>
+                {
+                    string[] args = line.Split('=', 2);
+                    if (args[0] == "id")
+                    {
+                        id = args[1];
+                        return true;
+                    }
+                    if (args[0] == "name")
+                    {
+                        name = args[1];
+                        return true;
+                    }
+                    if (args[0] == "readtonerlevelregex")
+                    {
+                        readtonerlevelregex = args[1];
+                        return true;
+                    }
+                    return false;
+                });
+                // Debug Info: Here is reversed, so 0x04 means {false, true, true}
+                BitArray settingcheck = new BitArray(
+                new bool[]{
+                id != "",
+                name != "",
+                readtonerlevelregex != ""
+                });
+                byte[] code = new byte[1];
+                settingcheck.CopyTo(code, 0);
+                //settingcheck.Not(); not working
+                string hex = BitConverter.ToString(code);
+            }
+        }
+        private string[] GetPrinterModelConfigFiles()
+        {
+            if (!Directory.Exists("Models"))
+                throw new Exception("Models config directory doesn't exists.");
+            string[] files = Directory.GetFiles("Models");
+            if (files.Length == 0)
+                throw new Exception("Models config directory is empty");
+            return files;
+        }
+        /*
+         * Windows Credentials
+         */
         public PasswordCredential? GetAlerterCreds()
         {
             PasswordVault vault = new PasswordVault();
@@ -120,12 +178,12 @@ namespace PrinterStatusLogger.Config
         /// </summary>
         /// <param name="filename">Name of file to read</param>
         /// <param name="function">Function to perform on loaded line data</param>
-        private void ReadConfig(string filename, Func<string, bool> function)
+        private void ReadConfig(string path, Func<string, bool> function)
         {
-            Logger.Log(LogType.INFO, "Reading config file: " + filename);
+            Logger.Log(LogType.INFO, "Reading config file: " + path);
             string line;
             int loaded = 0;
-            using (StreamReader sr = new StreamReader(Path.Combine("Config", filename)))
+            using (StreamReader sr = new StreamReader(path))
             {
                 int n = 0;
                 while ((line = sr.ReadLine()) != null)
@@ -139,7 +197,7 @@ namespace PrinterStatusLogger.Config
                     if (function.Invoke(line))
                         loaded++;
                     else
-                        Logger.Log(LogType.ERROR, "Invalid setting in " + filename + " at line " + n);
+                        Logger.Log(LogType.ERROR, "Invalid setting in " + path + " at line " + n);
                 }
             }
             Logger.Log(LogType.INFO, "Loaded objects form config: " + loaded);
@@ -150,7 +208,7 @@ namespace PrinterStatusLogger.Config
                 Directory.CreateDirectory("Config");
             using (StreamWriter sw = File.CreateText(Path.Combine("Config", filename)))
             {
-                sw.WriteLine("# Default");
+                sw.WriteLine("# Default"); // TODO Copy from .def
             }
         }
         private bool Ask(string question)
