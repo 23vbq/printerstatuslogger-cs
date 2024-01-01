@@ -11,8 +11,6 @@ namespace PrinterStatusLogger.PrinterManaging
         {
             _printerModels = new List<PrinterModel>();
             _printers = new List<Printer>();
-
-            RegisterPrinterModels();
         }
 
         public void AddPrinter(string name, string address, string modelId)
@@ -28,13 +26,15 @@ namespace PrinterStatusLogger.PrinterManaging
                 if (model.Id == id) return model;
             return null;
         }
-        private void RegisterPrinterModels()
+        public void RegisterPrinterModel(PrinterModel model)
         {
-            PrinterModel model;
+            /*PrinterModel model;
             model = new PrinterModel("T_001", "Elegancka drukarka", @"(?<=port = )[0-9]{2}");
             _printerModels.Add(model);
             model = new PrinterModel("T_002", "Elegancka drukarka", "(?<=<h1 id=\"trundeid\">)[0-9]{2}(?=%</h1>)");
+            _printerModels.Add(model);*/
             _printerModels.Add(model);
+            Logger.Log(LogType.INFO, "Registerred PrinterModel: [" + model.Id + "; " + model.Name + "]");
         }
 
         public void ListPrinterModels()

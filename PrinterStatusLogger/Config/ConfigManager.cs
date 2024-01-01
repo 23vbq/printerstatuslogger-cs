@@ -78,7 +78,7 @@ namespace PrinterStatusLogger.Config
         /*
          * Loading models
          */
-        public void LoadPrinterModels()
+        public void LoadPrinterModels(Action<PrinterModel> registerModel) // TODO rewrite
         {
             string[] files;
             try
@@ -127,7 +127,16 @@ namespace PrinterStatusLogger.Config
                 settingcheck.CopyTo(code, 0);
                 //settingcheck.Not(); not working
                 string hex = BitConverter.ToString(code);
+                if (hex != "07")
+                {
+                    Logger.Log(LogType.ERROR, "Not all arguments specified for model " + file + ": Check code - 0x" + hex);
+                    continue;
+                }
+                PrinterModel buffer = new PrinterModel(id, name, readtonerlevelregex);
+                registerModel.Invoke(buffer);
+                n++;
             }
+            Logger.Log(LogType.INFO, "Loaded printer models: " + n);
         }
         private string[] GetPrinterModelConfigFiles()
         {

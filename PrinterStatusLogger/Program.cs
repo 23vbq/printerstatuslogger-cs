@@ -40,7 +40,7 @@ namespace PrinterStatusLogger
             }
             try
             {
-                configManager.LoadPrinterModels();
+                configManager.LoadPrinterModels(printerManager.RegisterPrinterModel);
                 configManager.LoadPrinters(printerManager);
                 Alerter.Initialize(configManager.GetAlerterCreds(), configManager.LoadAlerter);
                 Logger.Log(LogType.INFO, "Starting printers scan");
