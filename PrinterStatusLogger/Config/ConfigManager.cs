@@ -1,6 +1,7 @@
 ﻿using PrinterStatusLogger.PrinterManaging;
 using System.Collections;
 using System.Net;
+using System.Reflection;
 using Windows.Security.Credentials;
 using Windows.Security.Credentials.UI;
 
@@ -11,6 +12,9 @@ namespace PrinterStatusLogger.Config
         private readonly string _printersConfigFilename = "printers.cfg";
         private readonly string _alerterConfigFilename = "alerter.cfg";
 
+        private readonly string _DEF_printersConfigResourceName = "PrinterStatusLogger.Config.DefaultConfig.printers.cfg.def";
+        private readonly string _DEF_alerterConfigFilename = "PrinterStatusLogger.Config.DefaultConfig.alerter.cfg.def";
+
         public void LoadPrinters(PrinterManager manager)
         {
             string path = Path.Combine("Config", _printersConfigFilename);
@@ -18,7 +22,7 @@ namespace PrinterStatusLogger.Config
                 Logger.Log(LogType.WARNING, "Printers config not found");
                 if (Program.userMode && Ask("Do you want to create default config file?"))
                 {
-                    CreateConfigFile(_printersConfigFilename);
+                    CreateConfigFile(_printersConfigFilename, _DEF_printersConfigResourceName);
                     Logger.Log(LogType.INFO, "File " + _printersConfigFilename + " created at " + Path.GetFullPath(Path.Combine("Config", _printersConfigFilename)));
                 }
                 else
@@ -41,7 +45,7 @@ namespace PrinterStatusLogger.Config
                 Logger.Log(LogType.WARNING, "Alerter config not found");
                 if (Program.userMode && Ask("Do you want to create default config file?"))
                 {
-                    CreateConfigFile(_alerterConfigFilename);
+                    CreateConfigFile(_alerterConfigFilename, _DEF_alerterConfigFilename);
                     Logger.Log(LogType.INFO, "File " + _alerterConfigFilename + " created at " + Path.GetFullPath(Path.Combine("Config", _alerterConfigFilename)));
                 }
                 else
@@ -211,13 +215,26 @@ namespace PrinterStatusLogger.Config
             }
             Logger.Log(LogType.INFO, "Loaded objects form config: " + loaded);
         }
-        private void CreateConfigFile(string filename)
+        private void CreateConfigFile(string filename, string resourceName)
         {
             if (!Directory.Exists("Config"))
                 Directory.CreateDirectory("Config");
-            using (StreamWriter sw = File.CreateText(Path.Combine("Config", filename)))
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            Stream resourceStream = assembly.GetManifestResourceStream(resourceName);
+            if (resourceStream == null)
+                throw new Exception("Resource stream is null. Please contact with devs.");
+            using (StreamReader reader = new StreamReader(resourceStream))
             {
-                sw.WriteLine("# Default"); // TODO Copy from .def
+                using (StreamWriter sw = File.CreateText(Path.Combine("Config", filename)))
+                {
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        sw.WriteLine(line);
+                    }
+                    sw.Close();
+                }
+                reader.Close();
             }
         }
         private bool Ask(string question)
@@ -231,6 +248,7 @@ namespace PrinterStatusLogger.Config
                     break;
                 Console.Write("\nInvalid option. (y/n) : ");
             }
+            Console.WriteLine();
             return key.Key == ConsoleKey.Y;
         }
 

@@ -1,2 +1,4 @@
-# Default
-Fajna_taka	https://zetcode.com/csharp/httpclient/	0
+# Default printers config
+# Put each printer in other lines, with following pattern. Each value of printer must be separated with tab character.
+# Name	Address	ModelID
+Fajna_taka	https://zetcode.com/csharp/httpclient/	T_001

@@ -1,6 +1,7 @@
 ﻿using PrinterStatusLogger.CommandHandling;
 using PrinterStatusLogger.Config;
 using PrinterStatusLogger.PrinterManaging;
+using System.Reflection;
 
 namespace PrinterStatusLogger
 {
@@ -45,7 +46,7 @@ namespace PrinterStatusLogger
                 Alerter.Initialize(configManager.GetAlerterCreds(), configManager.LoadAlerter);
                 Logger.Log(LogType.INFO, "Starting printers scan");
                 printerManager.RunPrinterScan();
-                Alerter.Send();
+                //Alerter.Send();
             } catch (Exception ex)
             {
                 Logger.Log(LogType.ERROR, ex.Message);

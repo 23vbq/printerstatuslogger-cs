@@ -8,4 +8,14 @@
     <PublishSingleFile>true</PublishSingleFile>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Config\DefaultConfig\alerter.cfg.def" />
+    <None Remove="Config\DefaultConfig\printers.cfg.def" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Config\DefaultConfig\alerter.cfg.def" />
+    <EmbeddedResource Include="Config\DefaultConfig\printers.cfg.def" />
+  </ItemGroup>
+
 </Project>
