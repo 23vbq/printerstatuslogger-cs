@@ -20,7 +20,7 @@ namespace PrinterStatusLogger.Config
             string path = Path.Combine("Config", _printersConfigFilename);
             if (!configExists(_printersConfigFilename)){
                 Logger.Log(LogType.WARNING, "Printers config not found");
-                if (Program.userMode && Ask("Do you want to create default config file?"))
+                if (Ask("Do you want to create default config file?"))
                 {
                     CreateConfigFile(_printersConfigFilename, _DEF_printersConfigResourceName);
                     Logger.Log(LogType.INFO, "File " + _printersConfigFilename + " created at " + Path.GetFullPath(Path.Combine("Config", _printersConfigFilename)));
@@ -74,6 +74,15 @@ namespace PrinterStatusLogger.Config
                 if (args[0] == "recipients")
                 {
                     Alerter.MessageRecipients = args[1];
+                    return true;
+                }
+                if (args[0] == "minTonerLevel")
+                {
+                    int x = -1;
+                    int.TryParse(args[1], out x);
+                    if (x == -1)
+                        return false;
+                    Alerter.minTonerLevel = x;
                     return true;
                 }
                 return false;
@@ -215,6 +224,12 @@ namespace PrinterStatusLogger.Config
             }
             Logger.Log(LogType.INFO, "Loaded objects form config: " + loaded);
         }
+        /// <summary>
+        /// Creates default config file by copying embedded resource to a file
+        /// </summary>
+        /// <param name="filename">Name of file to write</param>
+        /// <param name="resourceName">Resource name to copy</param>
+        /// <exception cref="Exception">Throws exception if resource stream is null</exception>
         private void CreateConfigFile(string filename, string resourceName)
         {
             if (!Directory.Exists("Config"))
@@ -237,8 +252,16 @@ namespace PrinterStatusLogger.Config
                 reader.Close();
             }
         }
+        /// <summary>
+        /// Asks user yes or no.
+        /// User need to be in usermode (-u).
+        /// </summary>
+        /// <param name="question">Question to ask</param>
+        /// <returns>yes - true<br></br>no - false</returns>
         private bool Ask(string question)
         {
+            if (!Program.userMode)
+                return false;
             Console.Write(question + " (y/n) : ");
             ConsoleKeyInfo key;
             while (true)

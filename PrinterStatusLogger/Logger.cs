@@ -1,4 +1,5 @@
 ﻿using PrinterStatusLogger.PrinterManaging;
+using System.Collections;
 
 namespace PrinterStatusLogger
 {
@@ -59,6 +60,16 @@ namespace PrinterStatusLogger
                 return;
             }
             Console.ForegroundColor = logcolor[type];
+        }
+        public static string BitCheck(bool[] bools, Int32 byte_size) //, out string output_string
+        {
+            // Debug Info: Here is reversed, so 0x01 means {false, true, true}
+            BitArray ba = new BitArray(bools);
+            byte[] code = new byte[byte_size];
+            ba.Not();
+            ba.CopyTo(code, 0);
+            //output_string = BitConverter.ToString(code);
+            return BitConverter.ToString(code); // TODO change to bool
         }
     }
 }

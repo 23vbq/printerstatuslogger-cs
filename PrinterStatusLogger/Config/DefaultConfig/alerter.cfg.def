@@ -4,3 +4,6 @@ server=smtp.domain.xyz
 port=587
 # Message Recipients (comma-separated)
 recipients=defefault@domain.xyz
+
+# Alerter rules
+minTonerLevel=20

@@ -23,22 +23,36 @@ namespace PrinterStatusLogger
             }
         }
 
+        /*
+         * Smtp Server
+         */
         public static string SmtpServer = "";
         public static int SmtpPort = -1;
         public static string MessageRecipients = "";
 
-        public static readonly int minTonerLevel = 90;
+        /*
+         * Rules
+         */ 
+        public static int minTonerLevel = -1;
+        // Default values
+        private const int _DEF_minTonerLevel = 20;
 
+        /*
+         * Properties
+         */
         private static bool Initialized = false;
         private static SmtpClient _smtpClient;
         private static NetworkCredential _credential;
         private static bool _errorBit;
 
+        /*
+         * Buffer
+         */
         private static List<AlertPrinterObj> _alertBuffer;
 
         static Alerter()
         {
-            _smtpClient = new SmtpClient("smtp.gmail.com", 587); // TODO Server in config, better config itd.
+            _smtpClient = new SmtpClient(); // TODO Server in config, better config itd.
             _smtpClient.EnableSsl = true;
             _smtpClient.UseDefaultCredentials = false;
             _credential = new NetworkCredential();
@@ -58,22 +72,44 @@ namespace PrinterStatusLogger
             _smtpClient.Credentials = _credential;
 
             loadAlerterConfig.Invoke();
-            // Debug Info: Here is reversed, so 0x04 means {false, true, true}
-            BitArray settingcheck = new BitArray(
+            Initialized = (InitializeSmtpServer() && InitializeRules());
+        }
+        private static bool InitializeSmtpServer()
+        {
+            // Debug Info: Here is reversed, so 0x01 means {false, true, true}
+            /*BitArray settingcheck = new BitArray(
             new bool[]{
                 SmtpServer != "",
                 SmtpPort != -1,
                 MessageRecipients != ""
             });
             byte[] code = new byte[1];
+            settingcheck.Not();
             settingcheck.CopyTo(code, 0);
-            //settingcheck.Not(); not working
-            string hex = BitConverter.ToString(code);
-            Initialized = hex == "07";
-            if (!Initialized)
+            string hex = BitConverter.ToString(code);*/
+            string hex = Logger.BitCheck(new bool[]
             {
-                Logger.Log(LogType.ERROR, "Cannot initialize Alerter: Check code - 0x" + hex);
+                SmtpServer != "",
+                SmtpPort != -1,
+                MessageRecipients != ""
+            }, 1);
+            if (hex != "00")
+            {
+                Logger.Log(LogType.ERROR, "Cannot initialize Alerter SmtpServer: Check code - 0x" + hex);
+                return false;
             }
+            _smtpClient.Host = SmtpServer;
+            _smtpClient.Port = SmtpPort;
+            return true;
+        }
+        private static bool InitializeRules()
+        {
+            if (minTonerLevel == -1)
+            {
+                Logger.Log(LogType.WARNING, "Alerter Rules: minTonerLevel is not set, default value [20] will be used");
+                minTonerLevel = _DEF_minTonerLevel;
+            }
+            return true;
         }
 
         public static void Handler(Printer printer, int tonerLevel)
@@ -115,6 +151,9 @@ namespace PrinterStatusLogger
                 _errorBit = true;
             }
         }
+        /*
+         * Alert Build
+         */
         private static void AddPrinterTonerAlert(StringBuilder sb)
         {
             sb.Append("<b>Low toner level: </b><br>");
