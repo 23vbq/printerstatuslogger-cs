@@ -17,7 +17,8 @@ namespace PrinterStatusLogger
         private static Dictionary<LogType, ConsoleColor> logcolor = new Dictionary<LogType, ConsoleColor>()
         {
             {LogType.ERROR, ConsoleColor.DarkRed },
-            {LogType.WARNING, ConsoleColor.Yellow }
+            {LogType.WARNING, ConsoleColor.Yellow },
+            {LogType.PRNT_INFO, ConsoleColor.Green }
         };
 
         static Logger()
@@ -48,6 +49,12 @@ namespace PrinterStatusLogger
         {
             Log(LogType.PRNT_INFO, printer.Address + " Toner: " +  tonerLevel);
         }
+        /// <summary>
+        /// Builds log in default format
+        /// </summary>
+        /// <param name="type">Type of log</param>
+        /// <param name="message">Message to send in log</param>
+        /// <returns></returns>
         public static string BuildLog(LogType type, string message)
         {
             return DateTime.Now.ToString("HH:mm:ss dd/MM/yyyy") + " [" + type.ToString() + "] " + message;
@@ -61,15 +68,19 @@ namespace PrinterStatusLogger
             }
             Console.ForegroundColor = logcolor[type];
         }
-        public static string BitCheck(bool[] bools, Int32 byte_size) //, out string output_string
+        /// <summary>
+        /// Creates string containing hex representation of bools array. It allows to easy check lot of bools with error code output.<br></br>
+        /// Debug Info: Bits are reversed, so 0x01 means {false, true, true}
+        /// </summary>
+        /// <param name="bools">Array to check</param>
+        /// <param name="byte_size">Amount of bytes to store bits</param>
+        /// <returns>Hex representation of reversed array in byte size string.<br></br>Ex. byte_size = 1 - "0x04"</returns>
+        public static string BitCheck(bool[] bools, Int32 byte_size)
         {
-            // Debug Info: Here is reversed, so 0x01 means {false, true, true}
             BitArray ba = new BitArray(bools);
             byte[] code = new byte[byte_size];
-            ba.Not();
             ba.CopyTo(code, 0);
-            //output_string = BitConverter.ToString(code);
-            return BitConverter.ToString(code); // TODO change to bool
+            return "0x" + BitConverter.ToString(code);
         }
     }
 }

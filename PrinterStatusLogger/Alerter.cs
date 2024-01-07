@@ -1,9 +1,6 @@
-﻿using PrinterStatusLogger.Config;
-using PrinterStatusLogger.PrinterManaging;
-using System.Collections;
+﻿using PrinterStatusLogger.PrinterManaging;
 using System.Net;
 using System.Net.Mail;
-using System.Security;
 using System.Text;
 using Windows.Security.Credentials;
 
@@ -89,13 +86,13 @@ namespace PrinterStatusLogger
             string hex = BitConverter.ToString(code);*/
             string hex = Logger.BitCheck(new bool[]
             {
-                SmtpServer != "",
-                SmtpPort != -1,
-                MessageRecipients != ""
+                SmtpServer == "",
+                SmtpPort == -1,
+                MessageRecipients == ""
             }, 1);
-            if (hex != "00")
+            if (hex != "0x00")
             {
-                Logger.Log(LogType.ERROR, "Cannot initialize Alerter SmtpServer: Check code - 0x" + hex);
+                Logger.Log(LogType.ERROR, "Cannot initialize Alerter SmtpServer: Check code - " + hex);
                 return false;
             }
             _smtpClient.Host = SmtpServer;

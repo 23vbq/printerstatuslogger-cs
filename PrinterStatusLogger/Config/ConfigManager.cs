@@ -1,9 +1,6 @@
 ﻿using PrinterStatusLogger.PrinterManaging;
-using System.Collections;
-using System.Net;
 using System.Reflection;
 using Windows.Security.Credentials;
-using Windows.Security.Credentials.UI;
 
 namespace PrinterStatusLogger.Config
 {
@@ -129,20 +126,15 @@ namespace PrinterStatusLogger.Config
                     }
                     return false;
                 });
-                // Debug Info: Here is reversed, so 0x04 means {false, true, true}
-                BitArray settingcheck = new BitArray(
-                new bool[]{
-                id != "",
-                name != "",
-                readtonerlevelregex != ""
-                });
-                byte[] code = new byte[1];
-                settingcheck.CopyTo(code, 0);
-                //settingcheck.Not(); not working
-                string hex = BitConverter.ToString(code);
-                if (hex != "07")
+                string hex = Logger.BitCheck(new bool[]
                 {
-                    Logger.Log(LogType.ERROR, "Not all arguments specified for model " + file + ": Check code - 0x" + hex);
+                    id == "",
+                    name == "",
+                    readtonerlevelregex == ""
+                }, 1);
+                if (hex != "0x00")
+                {
+                    Logger.Log(LogType.ERROR, "Not all arguments specified for model " + file + ": Check code - " + hex);
                     continue;
                 }
                 PrinterModel buffer = new PrinterModel(id, name, readtonerlevelregex);
