@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "PrinterStatusLogger": {
+      "commandName": "Project",
+      "commandLineArgs": "-u -na"
+    }
+  }
+}

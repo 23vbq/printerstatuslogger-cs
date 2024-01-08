@@ -8,9 +8,9 @@ namespace PrinterStatusLogger
     {
         public const string version = "0.2";
 
-        public static bool exitCalled = false;
-        public static bool userMode = true;
-        public static bool noAlertMode = true;
+        //public static bool exitCalled = false; // OLD FOR COMMAND HANDLER
+        public static bool userMode = false;
+        public static bool noAlertMode = false;
 
         static void Main(string[] args)
         {
