@@ -105,6 +105,7 @@ namespace PrinterStatusLogger.Config
             {
                 string id = "";
                 string name = "";
+                string readtonerlevelpath = "";
                 string readtonerlevelregex = "";
                 ReadConfig(file, (line) =>
                 {
@@ -119,6 +120,11 @@ namespace PrinterStatusLogger.Config
                         name = args[1];
                         return true;
                     }
+                    if (args[0] == "readtonerlevelpath")
+                    {
+                        readtonerlevelpath = args[1];
+                        return true;
+                    }
                     if (args[0] == "readtonerlevelregex")
                     {
                         readtonerlevelregex = args[1];
@@ -130,6 +136,7 @@ namespace PrinterStatusLogger.Config
                 {
                     id == "",
                     name == "",
+                    readtonerlevelpath == "",
                     readtonerlevelregex == ""
                 }, 1);
                 if (hex != "0x00")
@@ -137,7 +144,7 @@ namespace PrinterStatusLogger.Config
                     Logger.Log(LogType.ERROR, "Not all arguments specified for model " + file + ": Check code - " + hex);
                     continue;
                 }
-                PrinterModel buffer = new PrinterModel(id, name, readtonerlevelregex);
+                PrinterModel buffer = new PrinterModel(id, name, readtonerlevelpath, readtonerlevelregex);
                 registerModel.Invoke(buffer);
                 n++;
             }

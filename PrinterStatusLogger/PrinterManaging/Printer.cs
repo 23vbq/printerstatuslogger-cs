@@ -38,7 +38,7 @@
             string? content = null;
             using (var client = new HttpClient())
             {
-                var result = client.GetAsync(this.Address);
+                var result = client.GetAsync(this.Address + Model.ReadTonerLevelPath);
                 result.Wait();
                 if (result.Result.StatusCode != System.Net.HttpStatusCode.OK)
                     throw new Exception(result.Result.StatusCode.ToString());

@@ -7,14 +7,17 @@ namespace PrinterStatusLogger.PrinterManaging
         public string Id { get; private set; }
         public string Name { get; private set; }
 
-        //private Func<string, int> ReadTonerLevelFunction;
+        /*
+         * Scan properties
+         */
+        public string ReadTonerLevelPath { get; private set; }
         private string ReadTonerLevelRegex;
 
-        public PrinterModel(string id, string name, string readtonerlevelregex) //Func<string, int> readtonerlevelfunction
+        public PrinterModel(string id, string name, string readtonerlevelpath, string readtonerlevelregex)
         {
             Id = id;
             Name = name;
-            //ReadTonerLevelFunction = readtonerlevelfunction;
+            ReadTonerLevelPath = readtonerlevelpath;
             ReadTonerLevelRegex = readtonerlevelregex;
         }
 

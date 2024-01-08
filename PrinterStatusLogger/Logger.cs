@@ -70,7 +70,7 @@ namespace PrinterStatusLogger
         }
         /// <summary>
         /// Creates string containing hex representation of bools array. It allows to easy check lot of bools with error code output.<br></br>
-        /// Debug Info: Bits are reversed, so 0x01 means {false, true, true}
+        /// Debug Info: Bits are reversed, so 0x01 means {false, true, true} | or maybe its not :P
         /// </summary>
         /// <param name="bools">Array to check</param>
         /// <param name="byte_size">Amount of bytes to store bits</param>
