@@ -59,6 +59,8 @@ namespace PrinterStatusLogger
         }
         public static void Initialize(PasswordCredential pc, Action loadAlerterConfig)
         {
+            if (Program.noAlertMode)
+                return;
             if (pc == null)
             {
                 Logger.Log(LogType.ERROR, "Cannot initialize Alerter: Credentials is null");
@@ -73,17 +75,6 @@ namespace PrinterStatusLogger
         }
         private static bool InitializeSmtpServer()
         {
-            // Debug Info: Here is reversed, so 0x01 means {false, true, true}
-            /*BitArray settingcheck = new BitArray(
-            new bool[]{
-                SmtpServer != "",
-                SmtpPort != -1,
-                MessageRecipients != ""
-            });
-            byte[] code = new byte[1];
-            settingcheck.Not();
-            settingcheck.CopyTo(code, 0);
-            string hex = BitConverter.ToString(code);*/
             string hex = Logger.BitCheck(new bool[]
             {
                 SmtpServer == "",
@@ -111,6 +102,8 @@ namespace PrinterStatusLogger
 
         public static void Handler(Printer printer, int tonerLevel)
         {
+            if (Program.noAlertMode)
+                return;
             if (tonerLevel > minTonerLevel)
                 return;
             _alertBuffer.Add(new AlertPrinterObj(printer.Name, tonerLevel));
@@ -118,6 +111,8 @@ namespace PrinterStatusLogger
 
         public static void Send()
         {
+            if (Program.noAlertMode)
+                return;
             if (!Initialized)
             {
                 Logger.Log(LogType.ERROR, "Alerter not initialized");

@@ -23,12 +23,12 @@
                 content = GetPrinterWebInterface();
             } catch (Exception ex)
             {
-                Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + ex.Message);
+                Logger.Log(LogType.ERROR, ex.Message + "at" + Address);
                 return -2;
             }
             if (content == null)
             {
-                Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + "\tSomething goes wrong");
+                Logger.Log(LogType.ERROR, "Something gone wrong at " + Address);
                 return -3;
             }
             return Model.ReadTonerLevelFromResponse(content);

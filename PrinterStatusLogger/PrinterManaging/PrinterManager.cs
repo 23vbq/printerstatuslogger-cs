@@ -1,6 +1,4 @@
-﻿using System.Text.RegularExpressions;
-
-namespace PrinterStatusLogger.PrinterManaging
+﻿namespace PrinterStatusLogger.PrinterManaging
 {
     public class PrinterManager
     {
@@ -28,23 +26,16 @@ namespace PrinterStatusLogger.PrinterManaging
         }
         public void RegisterPrinterModel(PrinterModel model)
         {
-            /*PrinterModel model;
-            model = new PrinterModel("T_001", "Elegancka drukarka", @"(?<=port = )[0-9]{2}");
-            _printerModels.Add(model);
-            model = new PrinterModel("T_002", "Elegancka drukarka", "(?<=<h1 id=\"trundeid\">)[0-9]{2}(?=%</h1>)");
-            _printerModels.Add(model);*/
             _printerModels.Add(model);
             Logger.Log(LogType.INFO, "Registerred PrinterModel: [" + model.Id + "; " + model.Name + "]");
         }
 
         public void ListPrinterModels()
         {
-            Console.WriteLine("List of avaliable printers:");
-            Console.WriteLine("Id\tName");
+            Logger.Log(LogType.INFO, "List of avaliable printers:");
+            Logger.Log(LogType.INFO, "Id\tName");
             foreach (PrinterModel model in _printerModels)
-            {
-                Console.WriteLine(model.Id + "\t" +  model.Name);
-            }
+                Logger.Log(LogType.INFO, model.Id + "\t" + model.Name);
         }
         public void RunPrinterScan()
         {

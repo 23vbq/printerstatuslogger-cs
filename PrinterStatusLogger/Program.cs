@@ -1,14 +1,16 @@
-﻿using PrinterStatusLogger.CommandHandling;
+﻿//using PrinterStatusLogger.CommandHandling;
 using PrinterStatusLogger.Config;
 using PrinterStatusLogger.PrinterManaging;
-using System.Reflection;
 
 namespace PrinterStatusLogger
 {
     internal class Program
     {
+        public const string version = "0.2";
+
         public static bool exitCalled = false;
         public static bool userMode = true;
+        public static bool noAlertMode = true;
 
         static void Main(string[] args)
         {
@@ -24,21 +26,35 @@ namespace PrinterStatusLogger
                 return;
             }
             commandHandler.Handle(args);*/
-            Logger.Log(LogType.INFO, "PrinterStatusLogger v0.1 " + args.ToString());
+            Logger.Log(LogType.INFO, "PrinterStatusLogger v" + version + " " + args.ToString());
             PrinterManager printerManager = new PrinterManager();
             ConfigManager configManager = new ConfigManager();
+            /*
+             * Args check
+             */
             if (args.Length > 0 )
             {
                 if (args.Contains("-u"))
-                {
                     userMode = true;
-                }
                 if (args.Contains("-m"))
                 {
                     printerManager.ListPrinterModels();
-                    return;
+                    Logger.Log(LogType.WARNING, "Listing model mode. Aborting other work...");
+                    Environment.Exit(0);
                 }
+                if (args.Contains("-na"))
+                    noAlertMode = true;
             }
+            /*
+             * Activated flags info
+             */
+            if (userMode)
+                Logger.Log(LogType.WARNING, "UserMode is activated. Program will be able to wait for user input!");
+            if (noAlertMode)
+                Logger.Log(LogType.WARNING, "NoAlertMode is activated. No alerts will be sent!");
+            /*
+             * Program part
+             */
             try
             {
                 configManager.LoadPrinterModels(printerManager.RegisterPrinterModel);
