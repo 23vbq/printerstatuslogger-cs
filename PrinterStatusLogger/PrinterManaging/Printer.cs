@@ -23,7 +23,7 @@
                 content = GetPrinterWebInterface();
             } catch (Exception ex)
             {
-                Logger.Log(LogType.ERROR, ex.Message + "at" + Address);
+                Logger.Log(LogType.ERROR, ex.Message + " at " + Address);
                 return -2;
             }
             if (content == null)

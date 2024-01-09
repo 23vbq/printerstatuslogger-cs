@@ -43,7 +43,7 @@
             {
                 int tonerlevel = p.GetTonerLevel();
                 Logger.Log(p, tonerlevel);
-                Alerter.Handler(p, tonerlevel);
+                Alerter.Handler(p, tonerlevel , tonerlevel > -1);
             }
             Logger.Log(LogType.INFO, "Scan ended");
         }

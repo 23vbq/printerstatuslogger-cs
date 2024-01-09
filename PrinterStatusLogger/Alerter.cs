@@ -8,12 +8,12 @@ namespace PrinterStatusLogger
 {
     public static class Alerter
     {
-        public struct AlertPrinterObj
+        public struct AlertTonerLevelPrinterObj
         {
             public string Name;
             public int TonerLevel;
 
-            public AlertPrinterObj(string name, int tonerLevel)
+            public AlertTonerLevelPrinterObj(string name, int tonerLevel)
             {
                 Name = name;
                 TonerLevel = tonerLevel;
@@ -45,7 +45,8 @@ namespace PrinterStatusLogger
         /*
          * Buffer
          */
-        private static List<AlertPrinterObj> _alertBuffer;
+        private static List<AlertTonerLevelPrinterObj> _alertTonerLevelBuffer;
+        private static List<Printer> _alertUnavaliableWebInterfaceBuffer;
 
         static Alerter()
         {
@@ -55,7 +56,8 @@ namespace PrinterStatusLogger
             _credential = new NetworkCredential();
             _errorBit = false;
 
-            _alertBuffer = new List<AlertPrinterObj>();
+            _alertTonerLevelBuffer = new List<AlertTonerLevelPrinterObj>();
+            _alertUnavaliableWebInterfaceBuffer = new List<Printer>();
         }
         public static void Initialize(PasswordCredential pc, Action loadAlerterConfig)
         {
@@ -100,13 +102,17 @@ namespace PrinterStatusLogger
             return true;
         }
 
-        public static void Handler(Printer printer, int tonerLevel)
+        public static void Handler(Printer printer, int tonerLevel, bool avalible)
         {
             if (Program.noAlertMode)
                 return;
-            if (tonerLevel > minTonerLevel)
+            if (!avalible)
+            {
+                _alertUnavaliableWebInterfaceBuffer.Add(printer);
                 return;
-            _alertBuffer.Add(new AlertPrinterObj(printer.Name, tonerLevel));
+            }
+            if (tonerLevel <= minTonerLevel)
+                _alertTonerLevelBuffer.Add(new AlertTonerLevelPrinterObj(printer.Name, tonerLevel));
         }
 
         public static void Send()
@@ -123,24 +129,42 @@ namespace PrinterStatusLogger
                 Logger.Log(LogType.WARNING, "Alerter error bit is set, skipping sending...");
                 return;
             }
+            // Initializing message
             MailMessage message = new MailMessage();
             message.From = new MailAddress(_credential.UserName);
             message.To.Add(MessageRecipients);
             message.IsBodyHtml = true;
             message.Subject = "PrinterStatusLogger " + DateTime.Now.ToString("HH:mm:ss dd/MM/yyyy");
+            // Building message
             StringBuilder sb = new StringBuilder();
-            AddPrinterTonerAlert(sb);
+            bool isGood = true;
+            if (_alertTonerLevelBuffer.Count != 0)
+            {
+                AddPrinterTonerAlert(sb);
+                isGood = false;
+            }
+            if (_alertUnavaliableWebInterfaceBuffer.Count != 0)
+            {
+                sb.Append("<br>");
+                AddUnavalibleWebInterfaceAlert(sb);
+                isGood = false;
+            }
+            if (isGood)
+                sb.Append("Every printer working fine! :)");
             message.Body = sb.ToString();
+            // Sending message
             try
             {
                 _smtpClient.Send(message);
                 Logger.Log(LogType.INFO, "Alert was sent");
-                _alertBuffer.Clear();
+                // Clearing
+                _alertTonerLevelBuffer.Clear();
+                _alertUnavaliableWebInterfaceBuffer.Clear();
                 sb.Clear();
             } catch (SmtpException ex)
             {
                 Logger.Log(LogType.ERROR, ex.Message);
-                _errorBit = true;
+                _errorBit = true; // To prevent trying to send in existing process if once failed, maybe for future implementations (or not :D)
             }
         }
         /*
@@ -151,12 +175,17 @@ namespace PrinterStatusLogger
             sb.Append("<b>Low toner level: </b><br>");
             sb.Append("<table>");
             sb.Append("<tr><th>Name</th><th>Toner Level</th></tr>");
-            foreach (var x in _alertBuffer)
-            {
-                //sb.Append("&nbsp;&nbsp;" + Logger.BuildLog(LogType.PRNT_INFO, x.Name + " Toner: " + x.TonerLevel) + "<br>");
-                //sb.Append("&nbsp;&nbsp;" + x.Name + "&emps;" + "<br>");
+            foreach (var x in _alertTonerLevelBuffer)
                 sb.Append("<tr><td>" + x.Name + "</td><td>" + x.TonerLevel + "%</td></tr>");
-            }
+            sb.Append("</table>");
+        }
+        private static void AddUnavalibleWebInterfaceAlert(StringBuilder sb)
+        {
+            sb.Append("<b>Unavaliable web interface: </b><br>");
+            sb.Append("<table>");
+            sb.Append("<tr><th>Name</th><th>Address</th></tr>");
+            foreach (var x in _alertUnavaliableWebInterfaceBuffer)
+                sb.Append("<tr><td>" + x.Name + "</td><td>" + x.Address + "</td></tr>");
             sb.Append("</table>");
         }
     }

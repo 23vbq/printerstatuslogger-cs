@@ -162,14 +162,14 @@ namespace PrinterStatusLogger.Config
         /*
          * Windows Credentials
          */
-        public PasswordCredential? GetAlerterCreds()
+        public PasswordCredential GetAlerterCreds()
         {
             PasswordVault vault = new PasswordVault();
             IReadOnlyList<PasswordCredential>? credList = null;
             try
             {
                 credList = vault.FindAllByResource("PrinterStatusLogger_Alerter");
-            } catch (Exception ex)
+            } catch
             {
                 Logger.Log(LogType.WARNING, "Alerter Credentials not found");
             }
@@ -181,7 +181,7 @@ namespace PrinterStatusLogger.Config
                     return GetAlerterCreds();
                 }
                 else
-                    return null;
+                    throw new Exception("Credentials for alerter doesn't exists.");
             }
             return credList[0];
         }
