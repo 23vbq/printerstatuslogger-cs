@@ -7,6 +7,7 @@ Report
 - Log in console output
 - Log in `syslog` file
 - Alert through email
+
 Printer scan
 - Get toner level
 - List unavaliable printers
