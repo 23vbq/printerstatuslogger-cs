@@ -26,6 +26,11 @@
         }
         public void RegisterPrinterModel(PrinterModel model)
         {
+            if (modelIdExists(model))
+            {
+                Logger.Log(LogType.WARNING, "Cannot register PrinterModel - Model already exists: [" + model.Id + "; " + model.Name + "]");
+                return;
+            }
             _printerModels.Add(model);
             Logger.Log(LogType.INFO, "Registerred PrinterModel: [" + model.Id + "; " + model.Name + "]");
         }
@@ -46,6 +51,13 @@
                 Alerter.Handler(p, tonerlevel , tonerlevel > -1);
             }
             Logger.Log(LogType.INFO, "Scan ended");
+        }
+        private bool modelIdExists(PrinterModel model)
+        {
+            foreach (PrinterModel x in _printerModels)
+                if (x.Id == model.Id)
+                    return true;
+            return false;
         }
     }
 }

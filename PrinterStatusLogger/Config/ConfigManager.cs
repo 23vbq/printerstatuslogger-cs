@@ -164,6 +164,8 @@ namespace PrinterStatusLogger.Config
          */
         public PasswordCredential GetAlerterCreds()
         {
+            if (Program.noAlertMode)
+                return null;
             PasswordVault vault = new PasswordVault();
             IReadOnlyList<PasswordCredential>? credList = null;
             try
