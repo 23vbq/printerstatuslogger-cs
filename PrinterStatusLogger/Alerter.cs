@@ -19,6 +19,19 @@ namespace PrinterStatusLogger
                 TonerLevel = tonerLevel;
             }
         }
+        public struct AlertErrorPrinterObj
+        {
+            public string Name;
+            public string Address;
+            public string CausedBy;
+
+            public AlertErrorPrinterObj(string name, string address, string causedby)
+            {
+                Name = name;
+                Address = address;
+                CausedBy = causedby;
+            }
+        }
 
         /*
          * Smtp Server
@@ -47,6 +60,7 @@ namespace PrinterStatusLogger
          */
         private static List<AlertTonerLevelPrinterObj> _alertTonerLevelBuffer;
         private static List<Printer> _alertUnavaliableWebInterfaceBuffer;
+        private static List<AlertErrorPrinterObj> _alertErrorBuffer;
 
         static Alerter()
         {
@@ -58,6 +72,7 @@ namespace PrinterStatusLogger
 
             _alertTonerLevelBuffer = new List<AlertTonerLevelPrinterObj>();
             _alertUnavaliableWebInterfaceBuffer = new List<Printer>();
+            _alertErrorBuffer = new List<AlertErrorPrinterObj>();
         }
         public static void Initialize(PasswordCredential pc, Action loadAlerterConfig)
         {
@@ -114,6 +129,10 @@ namespace PrinterStatusLogger
             if (tonerLevel <= minTonerLevel)
                 _alertTonerLevelBuffer.Add(new AlertTonerLevelPrinterObj(printer.Name, tonerLevel));
         }
+        public static void AddError(Printer printer, string causedby)
+        {
+            _alertErrorBuffer.Add(new AlertErrorPrinterObj(printer.Name, printer.Address, causedby));
+        }
 
         public static void Send()
         {
@@ -138,16 +157,26 @@ namespace PrinterStatusLogger
             // Building message
             StringBuilder sb = new StringBuilder();
             bool isGood = true;
+            bool newline = false;
             if (_alertTonerLevelBuffer.Count != 0)
             {
                 AddPrinterTonerAlert(sb);
                 isGood = false;
+                newline = true;
             }
             if (_alertUnavaliableWebInterfaceBuffer.Count != 0)
             {
-                sb.Append("<br>");
+                if (newline) sb.Append("<br>");
                 AddUnavalibleWebInterfaceAlert(sb);
                 isGood = false;
+                newline = true;
+            }
+            if (_alertErrorBuffer.Count != 0)
+            {
+                if (newline) sb.Append("<br>");
+                AddErrorAlert(sb);
+                isGood = false;
+                newline = true;
             }
             if (isGood)
                 sb.Append("Every printer working fine! :)");
@@ -186,6 +215,15 @@ namespace PrinterStatusLogger
             sb.Append("<tr><th>Name</th><th>Address</th></tr>");
             foreach (var x in _alertUnavaliableWebInterfaceBuffer)
                 sb.Append("<tr><td>" + x.Name + "</td><td>" + x.Address + "</td></tr>");
+            sb.Append("</table>");
+        }
+        private static void AddErrorAlert(StringBuilder sb)
+        {
+            sb.Append("<b>Error when scanning: </b><br>");
+            sb.Append("<table>");
+            sb.Append("<tr><th>Name</th><th>Address</th><th>Caused by</th></tr>");
+            foreach (var x in _alertErrorBuffer)
+                sb.Append("<tr><td>" + x.Name + "</td><td>" + x.Address + "</td><td>" + x.CausedBy + "</td></tr>");
             sb.Append("</table>");
         }
     }

@@ -16,7 +16,7 @@
         public int GetTonerLevel()
         {
             if (Model == null)
-                return -4;
+                throw new Exception("Model of " + Name + " is null");
             string? content = null;
             try
             {
@@ -24,12 +24,12 @@
             } catch (Exception ex)
             {
                 Logger.Log(LogType.ERROR, ex.Message + " at " + Address);
-                return -2;
+                return -1;
             }
             if (content == null)
             {
-                Logger.Log(LogType.ERROR, "Something gone wrong at " + Address);
-                return -3;
+                Logger.Log(LogType.ERROR, "Something gone wrong with " + Name + " at " + Address);
+                throw new Exception("GetTonerLevel exited with an error");
             }
             return Model.ReadTonerLevelFromResponse(content);
         }

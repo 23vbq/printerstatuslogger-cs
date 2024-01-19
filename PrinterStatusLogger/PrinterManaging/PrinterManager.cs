@@ -46,9 +46,17 @@
         {
             foreach(Printer p in _printers)
             {
-                int tonerlevel = p.GetTonerLevel();
-                Logger.Log(p, tonerlevel);
-                Alerter.Handler(p, tonerlevel , tonerlevel > -1);
+                try
+                {
+                    int tonerlevel = p.GetTonerLevel();
+                    if (tonerlevel != -1)
+                        Logger.Log(p, tonerlevel);
+                    Alerter.Handler(p, tonerlevel , tonerlevel > -1);
+                } catch (Exception ex)
+                {
+                    Logger.Log(LogType.ERROR, ex.Message);
+                    Alerter.AddError(p, ex.Message);
+                }
             }
             Logger.Log(LogType.INFO, "Scan ended");
         }

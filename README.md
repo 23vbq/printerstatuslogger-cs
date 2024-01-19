@@ -11,6 +11,7 @@ Report
 Printer scan
 - Get toner level
 - List unavaliable printers
+- List scan errors
 
 ## Usage
 Run from command line:
@@ -34,6 +35,11 @@ These files will be created from embedded defaults (require run program with Use
 
 ### Smtp Credentials
 Credentials for smtp server to authenticate are securely stored in PasswordVault (Windows Credential Manager `control keymgr.dll`).
+They are stored in Web Credentials with URL reference of `PrinterStatusLogger_Alerter`.
+They are loaded to memory on Alerter module initialization.
+
+To setup credentials you need to run program with User Mode.
+If you need to edit credentials you need to delete them from Windows Credential Manager and then run program with User Mode to setup credentials again.
 
 ### Printer Models
 All avaliable printer models are located in `Models` directory.
@@ -48,9 +54,16 @@ readtonerlevelregex=[Regex to find toner level]
 
 ## TODO
 - Reports Module - to report data in csv files
-- GetTonerLevel() Improvement - better response from function when error occurs
+- ~~GetTonerLevel() Improvement - better response from function when error occurs~~ - implemented need testing
 - Printer Scan Improvement - multitasking (to not wait when f.ex. when cannot connect to address)
 - ReadConfig() - rewrite to create kvp's list for better config reading
 - Logger
   - Logs in syslog format
   - Availability to connect to syslog server
+- Versions
+  - Installer
+  - Portable *(maybe for this option to use credentials every run, instead storing in keymgr.dll)*
+- Option to download models form github directly in program
+- Combine all Add__Alert functions to one function
+- *ExchangeOnline Server support - in future*
+- *Getting prints counter - in future*
