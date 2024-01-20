@@ -28,10 +28,12 @@ Avaliable arguments:
 ### Basic Configuration
 Program configuration is located in `Config` directory.
 It is based on 2 files.
-- `alerter.cfg` - Config of alerter module
+- `alerter.cfg` - Config of alerter module | [default config](PrinterStatusLogger/Config/DefaultConfig/alerter.cfg.def) |
+
   Smtp server and port, message recipients and alerter rules 
-- `printers.cfg` - List of printers to scan
-These files will be created from embedded defaults (require run program with User Mode).
+- `printers.cfg` - List of printers to scan | [default config](PrinterStatusLogger/Config/DefaultConfig/printers.cfg.def) |
+
+  These files will be created from embedded files (require run program with User Mode).
 
 ### Smtp Credentials
 Credentials for smtp server to authenticate are securely stored in PasswordVault (Windows Credential Manager `control keymgr.dll`).
