@@ -69,6 +69,8 @@ readtonerlevelregex=[Regex to find toner level [0-9]{1,3}]
   - Portable *(maybe for this option to use credentials every run, instead storing in keymgr.dll)*
 - Option to download models form github directly in program
 - Combine all Add__Alert functions to one function
-- Verbose mode that logs additional info
+- Run arguments
+  - Verbose mode that logs additional info
+  - Help
 - *ExchangeOnline Server support - in future*
 - *Getting prints counter - in future*
