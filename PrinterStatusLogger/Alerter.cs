@@ -44,8 +44,12 @@ namespace PrinterStatusLogger
          * Rules
          */ 
         public static int minTonerLevel = -1;
+        public static bool? unavaliablePrinters = null;
+        public static bool? scanErrors = null;
         // Default values
         private const int _DEF_minTonerLevel = 20;
+        private const bool _DEF_unavaliablePrinters = true;
+        private const bool _DEF_scanErrors = true;
 
         /*
          * Properties
@@ -111,8 +115,18 @@ namespace PrinterStatusLogger
         {
             if (minTonerLevel == -1)
             {
-                Logger.Log(LogType.WARNING, "Alerter Rules: minTonerLevel is not set, default value [20] will be used");
+                Logger.Log(LogType.WARNING, "Alerter Rules: minTonerLevel is not set, default value [" + _DEF_minTonerLevel + "] will be used");
                 minTonerLevel = _DEF_minTonerLevel;
+            }
+            if (unavaliablePrinters == null)
+            {
+                Logger.Log(LogType.WARNING, "Alerter Rules: unavaliablePrinters is not set, default value [" + _DEF_unavaliablePrinters.ToString() + "] will be used");
+                unavaliablePrinters = _DEF_unavaliablePrinters;
+            }
+            if (scanErrors == null)
+            {
+                Logger.Log(LogType.WARNING, "Alerter Rules: scanErrors is not set, default value [" + _DEF_scanErrors.ToString() + "] will be used");
+                scanErrors = _DEF_scanErrors;
             }
             return true;
         }

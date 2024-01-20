@@ -7,3 +7,5 @@ recipients=defefault@domain.xyz
 
 # Alerter rules
 minTonerLevel=20
+unavaliablePrinters=on
+scanErrors=on

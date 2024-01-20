@@ -51,13 +51,15 @@ You can download models from this repo or create model file by yourself using fo
 id=[Unique model id]
 name=[Name of printer]
 readtonerlevelpath=[Path after web interface address to find toner level]
-readtonerlevelregex=[Regex to find toner level]
+readtonerlevelregex=[Regex to find toner level [0-9]{1,3}]
 ```
 
 ## TODO
 - Reports Module - to report data in csv files
 - ~~GetTonerLevel() Improvement - better response from function when error occurs~~ - implemented need testing
-- Printer Scan Improvement - multitasking (to not wait when f.ex. when cannot connect to address)
+- Printer Scan Improvement
+  - Multitasking (to not wait when f.ex. when cannot connect to address)
+  - Try to ping when http not response
 - ReadConfig() - rewrite to create kvp's list for better config reading
 - Logger
   - Logs in syslog format
@@ -67,5 +69,6 @@ readtonerlevelregex=[Regex to find toner level]
   - Portable *(maybe for this option to use credentials every run, instead storing in keymgr.dll)*
 - Option to download models form github directly in program
 - Combine all Add__Alert functions to one function
+- Verbose mode that logs additional info
 - *ExchangeOnline Server support - in future*
 - *Getting prints counter - in future*

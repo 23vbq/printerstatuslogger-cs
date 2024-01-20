@@ -5,6 +5,7 @@ namespace PrinterStatusLogger
 {
     public enum LogType
     {
+        V_INFO, // Low Level
         INFO,
         WARNING,
         ERROR,

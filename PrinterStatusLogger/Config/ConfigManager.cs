@@ -25,7 +25,7 @@ namespace PrinterStatusLogger.Config
                 else
                     throw new Exception("Config file not found");
             }
-            ReadConfig(path, (line) =>
+            ReadConfigOld(path, (line) =>
             {
                 string[] args = line.Split('\t');
                 if (args.Length != 3)
@@ -48,7 +48,7 @@ namespace PrinterStatusLogger.Config
                 else
                     throw new Exception("Config file not found");
             }
-            ReadConfig(path, (line) =>
+            ReadConfigOld(path, (line) =>
             {
                 string[] args = line.Split('=', 2);
                 if (args[0] == "server")
@@ -82,6 +82,26 @@ namespace PrinterStatusLogger.Config
                     Alerter.minTonerLevel = x;
                     return true;
                 }
+                if (args[0] == "unavaliablePrinters")
+                {
+                    if (args[1] == "on")
+                        Alerter.unavaliablePrinters = true;
+                    else if (args[1] == "off")
+                        Alerter.unavaliablePrinters = false;
+                    else
+                        return false;
+                    return true;
+                }
+                if (args[0] == "scanErrors")
+                {
+                    if (args[1] == "on")
+                        Alerter.scanErrors = true;
+                    else if (args[1] == "off")
+                        Alerter.scanErrors = false;
+                    else
+                        return false;
+                    return true;
+                }
                 return false;
             });
         }
@@ -94,11 +114,9 @@ namespace PrinterStatusLogger.Config
             try
             {
                 files = GetPrinterModelConfigFiles();
-            } catch (Exception ex)
+            } catch (Exception ex) // FIXME Is ex needed?
             {
-                //Logger.Log(LogType.ERROR, ex.Message);
-                //throw new Exception("Fatal error");
-                throw ex;
+                throw;
             }
             int n = 0;
             foreach (string file in files)
@@ -107,7 +125,7 @@ namespace PrinterStatusLogger.Config
                 string name = "";
                 string readtonerlevelpath = "";
                 string readtonerlevelregex = "";
-                ReadConfig(file, (line) =>
+                ReadConfigOld(file, (line) =>
                 {
                     string[] args = line.Split('=', 2);
                     if (args[0] == "id")
@@ -150,6 +168,11 @@ namespace PrinterStatusLogger.Config
             }
             Logger.Log(LogType.INFO, "Loaded printer models: " + n);
         }
+        /// <summary>
+        /// Lists model config files
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="Exception">If directory not exists or is empty</exception>
         private string[] GetPrinterModelConfigFiles()
         {
             if (!Directory.Exists("Models"))
@@ -162,10 +185,17 @@ namespace PrinterStatusLogger.Config
         /*
          * Windows Credentials
          */
+        /// <summary>
+        /// Returns credentials for Alerter
+        /// </summary>
+        /// <returns>PasswordCredential or null when noAlertMode</returns>
+        /// <exception cref="Exception">If credentials doesn't exists</exception>
         public PasswordCredential GetAlerterCreds()
         {
             if (Program.noAlertMode)
+#pragma warning disable CS8603
                 return null;
+#pragma warning restore CS8603
             PasswordVault vault = new PasswordVault();
             IReadOnlyList<PasswordCredential>? credList = null;
             try
@@ -189,6 +219,7 @@ namespace PrinterStatusLogger.Config
         }
         private void SetAlerterCreds(PasswordVault vault)
         {
+            // FIXME need testing if can be null
             Console.WriteLine("Username: ");
             string un = Console.ReadLine();
             Console.WriteLine("Password: ");
@@ -201,7 +232,7 @@ namespace PrinterStatusLogger.Config
         /// </summary>
         /// <param name="filename">Name of file to read</param>
         /// <param name="function">Function to perform on loaded line data</param>
-        private void ReadConfig(string path, Func<string, bool> function)
+        private void ReadConfigOld(string path, Func<string, bool> function)
         {
             Logger.Log(LogType.INFO, "Reading config file: " + path);
             string line;
@@ -209,7 +240,9 @@ namespace PrinterStatusLogger.Config
             using (StreamReader sr = new StreamReader(path))
             {
                 int n = 0;
+#pragma warning disable CS8600
                 while ((line = sr.ReadLine()) != null)
+#pragma warning restore CS8600
                 {
                     n++;
                     if (line.StartsWith('#'))
@@ -225,6 +258,88 @@ namespace PrinterStatusLogger.Config
             }
             Logger.Log(LogType.INFO, "Loaded objects form config: " + loaded);
         }
+        /*
+         * IN PROGRESS
+         */
+        public void NEW_LoadPrinterModels(Action<PrinterModel> registerModel)
+        {
+            string[] files;
+            try
+            {
+                files = GetPrinterModelConfigFiles();
+            }
+            catch (Exception ex) // FIXME is ex needed
+            {
+                throw;
+            }
+            int n = 0;
+            foreach (string file in files)
+            {
+                Dictionary<string, string> config = ReadConfig(file);
+                string id, name, readtonerlevelpath, readtonerlevelregex;
+                GetConfigProperty<string>(config, "id", out id);
+                GetConfigProperty<string>(config, "name", out name);
+                GetConfigProperty<string>(config, "readtonerlevelpath", out readtonerlevelpath);
+                GetConfigProperty<string>(config, "readtonerlevelregex", out readtonerlevelregex);
+            }
+        }
+        private Dictionary<string, string> ReadConfig(string path)
+        {
+            if (!path.EndsWith(".cfg"))
+            {
+                Logger.Log(LogType.WARNING, "Skipping (not .cfg) file: " + path);
+            }
+            Logger.Log(LogType.INFO, "Reading config file: " + path);
+            string line;
+            string[] optline;
+            Dictionary<string, string> result = new Dictionary<string, string>();
+            using (StreamReader sr = new StreamReader(path))
+            {
+                int n = 0;
+                while ((line = sr.ReadLine()) != null)
+                {
+                    n++;
+                    if (line.StartsWith('#'))
+                        continue;
+                    if (line.Length < 1)
+                        continue;
+                    line = line.Split('#', 2)[0];
+                    optline = line.Split('=', 2);
+                    if (optline.Length != 2)
+                    {
+                        Logger.Log(LogType.WARNING, "Invalid data encountered in " + path + " at line " + n);
+                        continue;
+                    }
+                    result.Add(optline[0].Trim(), optline[1].Trim());
+                }
+            }
+            Logger.Log(LogType.INFO, "Loaded properties from config: " + result.Count);
+            return result;
+        }
+        private bool GetConfigProperty<T>(Dictionary<string, string> config, string key, out T? output)
+        {
+            output = default(T);
+            if (config == null)
+                return false;
+            if (!config.ContainsKey(key))
+            {
+                Logger.Log(LogType.ERROR, "Property " + key + " not found in config!");
+                return false;
+            }
+            try
+            {
+                output = (T)Convert.ChangeType(config[key], typeof(T));
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(LogType.ERROR, "Cannot parse property " + key + ":" + ex.Message);
+                return false;
+            }
+            return true;
+        }
+        /*
+         * END OF IN PROGRESS
+         */
         /// <summary>
         /// Creates default config file by copying embedded resource to a file
         /// </summary>

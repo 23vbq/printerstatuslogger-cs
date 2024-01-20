@@ -1,6 +1,7 @@
 ﻿//using PrinterStatusLogger.CommandHandling;
 using PrinterStatusLogger.Config;
 using PrinterStatusLogger.PrinterManaging;
+using Windows.ApplicationModel.Contacts;
 
 namespace PrinterStatusLogger
 {
@@ -38,6 +39,14 @@ namespace PrinterStatusLogger
                     userMode = true;
                 if (args.Contains("-m"))
                 {
+                    try
+                    {
+                        configManager.LoadPrinterModels(printerManager.RegisterPrinterModel);
+                    }
+                    catch (Exception ex)
+                    {
+                        FatalError(ex);
+                    }
                     printerManager.ListPrinterModels();
                     Logger.Log(LogType.WARNING, "Listing model mode. Aborting other work...");
                     Environment.Exit(0);
@@ -57,6 +66,7 @@ namespace PrinterStatusLogger
              */
             try
             {
+                //configManager.NEW_LoadPrinterModels(printerManager.RegisterPrinterModel);
                 configManager.LoadPrinterModels(printerManager.RegisterPrinterModel);
                 configManager.LoadPrinters(printerManager);
                 Alerter.Initialize(configManager.GetAlerterCreds(), configManager.LoadAlerter);
@@ -65,10 +75,14 @@ namespace PrinterStatusLogger
                 Alerter.Send();
             } catch (Exception ex)
             {
-                Logger.Log(LogType.ERROR, ex.Message);
-                Logger.Log(LogType.ERROR, "Fatal error! Aborting...");
-                Environment.Exit(1);
+                FatalError(ex);
             }
+        }
+        static void FatalError(Exception ex)
+        {
+            Logger.Log(LogType.ERROR, ex.Message);
+            Logger.Log(LogType.ERROR, "Fatal error! Aborting...");
+            Environment.Exit(1);
         }
     }
 }
