@@ -72,5 +72,6 @@ readtonerlevelregex=[Regex to find toner level [0-9]{1,3}]
 - Run arguments
   - Verbose mode that logs additional info
   - Help
+- *Config as class*
 - *ExchangeOnline Server support - in future*
 - *Getting prints counter - in future*

@@ -1,5 +1,7 @@
 ﻿using PrinterStatusLogger.PrinterManaging;
+using System.IO;
 using System.Reflection;
+using Windows.Media.Protection.PlayReady;
 using Windows.Security.Credentials;
 
 namespace PrinterStatusLogger.Config
@@ -60,7 +62,7 @@ namespace PrinterStatusLogger.Config
                 {
                     try
                     {
-                        Alerter.SmtpPort = Int32.Parse(args[1]);
+                        Alerter.SmtpPort = ushort.Parse(args[1]);
                         return true;
                     } catch (Exception ex)
                     {
@@ -79,15 +81,15 @@ namespace PrinterStatusLogger.Config
                     int.TryParse(args[1], out x);
                     if (x == -1)
                         return false;
-                    Alerter.minTonerLevel = x;
+                    Alerter.R_minTonerLevel = x;
                     return true;
                 }
                 if (args[0] == "unavaliablePrinters")
                 {
                     if (args[1] == "on")
-                        Alerter.unavaliablePrinters = true;
+                        Alerter.R_unavaliablePrinters = true;
                     else if (args[1] == "off")
-                        Alerter.unavaliablePrinters = false;
+                        Alerter.R_unavaliablePrinters = false;
                     else
                         return false;
                     return true;
@@ -95,9 +97,9 @@ namespace PrinterStatusLogger.Config
                 if (args[0] == "scanErrors")
                 {
                     if (args[1] == "on")
-                        Alerter.scanErrors = true;
+                        Alerter.R_scanErrors = true;
                     else if (args[1] == "off")
-                        Alerter.scanErrors = false;
+                        Alerter.R_scanErrors = false;
                     else
                         return false;
                     return true;
@@ -261,6 +263,33 @@ namespace PrinterStatusLogger.Config
         /*
          * IN PROGRESS
          */
+        public void NEW_LoadAlerter()
+        {
+            string path = Path.Combine("Config", _alerterConfigFilename);
+            if (!configExists(_alerterConfigFilename))
+            {
+                Logger.Log(LogType.WARNING, "Alerter config not found");
+                if (Program.userMode && Ask("Do you want to create default config file?"))
+                {
+                    CreateConfigFile(_alerterConfigFilename, _DEF_alerterConfigFilename);
+                    Logger.Log(LogType.INFO, "File " + _alerterConfigFilename + " created at " + Path.GetFullPath(Path.Combine("Config", _alerterConfigFilename)));
+                }
+                else
+                    throw new Exception("Config file not found");
+            }
+            Dictionary<string, string> config = ReadConfig(path);
+            // Load required properties
+            GetConfigProperty<string>(config, "server", out Alerter.SmtpServer);
+            GetConfigProperty<ushort>(config, "port", out Alerter.SmtpPort);
+            GetConfigProperty<string>(config, "recipients", out Alerter.MessageRecipients);
+            // Load not required properties
+            if (!GetConfigProperty<int>(config, "minTonerLevel", out Alerter.R_minTonerLevel))
+                Alerter.R_minTonerLevel = -1;
+            if (GetConfigProperty<string>(config, "unavaliablePrinters", out string unavaliablePrinters))
+                Alerter.R_unavaliablePrinters = (unavaliablePrinters == "on" ? true : (unavaliablePrinters == "off" ? false : throw new Exception("Invalid data in config on key: unavaliablePrinters"))); // TODO Need to throw line
+            if (GetConfigProperty<string>(config, "scanErrors", out string scanErrors))
+                Alerter.R_scanErrors = (scanErrors == "on" ? true : (scanErrors == "off" ? false : throw new Exception("Invalid data in config on key: scanErrors")));
+        }
         public void NEW_LoadPrinterModels(Action<PrinterModel> registerModel)
         {
             string[] files;
@@ -275,20 +304,46 @@ namespace PrinterStatusLogger.Config
             int n = 0;
             foreach (string file in files)
             {
+                if (!file.EndsWith(".cfg"))
+                {
+                    Logger.Log(LogType.WARNING, "Skipping (not .cfg) file: " + file);
+                    continue;
+                }
                 Dictionary<string, string> config = ReadConfig(file);
                 string id, name, readtonerlevelpath, readtonerlevelregex;
+                // Load properties
                 GetConfigProperty<string>(config, "id", out id);
                 GetConfigProperty<string>(config, "name", out name);
                 GetConfigProperty<string>(config, "readtonerlevelpath", out readtonerlevelpath);
                 GetConfigProperty<string>(config, "readtonerlevelregex", out readtonerlevelregex);
+                string hex = Logger.BitCheck(new bool[]
+                {
+                    id == null,
+                    name == null,
+                    readtonerlevelpath == null,
+                    readtonerlevelregex == null
+                }, 1);
+                if (hex != "0x00")
+                {
+                    Logger.Log(LogType.ERROR, "Not all arguments specified for model " + file + ": Check code - " + hex);
+                    continue;
+                }
+#pragma warning disable CS8604 // Cannot be null
+                registerModel.Invoke(new PrinterModel(id, name, readtonerlevelpath, readtonerlevelregex));
+#pragma warning restore CS8604
+                n++;
             }
+            Logger.Log(LogType.INFO, "Loaded printer models: " + n);
         }
+        /// <summary>
+        /// Reads config file. Gets one property each line in format <i>key = value</i>.<br></br>
+        /// All text after # is ignored.<br></br>
+        /// You can easily get desired property with GetConfigProperty
+        /// </summary>
+        /// <param name="path">Path to config file</param>
+        /// <returns>Dictionary of keys and values in <b>string</b> format</returns>
         private Dictionary<string, string> ReadConfig(string path)
         {
-            if (!path.EndsWith(".cfg"))
-            {
-                Logger.Log(LogType.WARNING, "Skipping (not .cfg) file: " + path);
-            }
             Logger.Log(LogType.INFO, "Reading config file: " + path);
             string line;
             string[] optline;
@@ -316,6 +371,14 @@ namespace PrinterStatusLogger.Config
             Logger.Log(LogType.INFO, "Loaded properties from config: " + result.Count);
             return result;
         }
+        /// <summary>
+        /// Gets required property from <i>ReadConfig</i> result and converts to desired <b>T</b> type.
+        /// </summary>
+        /// <typeparam name="T">Desired value type</typeparam>
+        /// <param name="config">Dictionary to find in</param>
+        /// <param name="key">Name of property to find</param>
+        /// <param name="output">Variable to store value of property</param>
+        /// <returns><b>True</b> if everything fine <br></br><b>False</b> if not found, cannot convert to type or config is null</returns>
         private bool GetConfigProperty<T>(Dictionary<string, string> config, string key, out T? output)
         {
             output = default(T);
@@ -323,7 +386,7 @@ namespace PrinterStatusLogger.Config
                 return false;
             if (!config.ContainsKey(key))
             {
-                Logger.Log(LogType.ERROR, "Property " + key + " not found in config!");
+                Logger.Log(LogType.V_WARNING, "Property " + key + " not found in config!");
                 return false;
             }
             try

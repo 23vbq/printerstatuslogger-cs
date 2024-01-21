@@ -37,19 +37,19 @@ namespace PrinterStatusLogger
          * Smtp Server
          */
         public static string SmtpServer = "";
-        public static int SmtpPort = -1;
+        public static ushort SmtpPort = 0; // Port is ushort => 0 - 65535 / 16 bits
         public static string MessageRecipients = "";
 
         /*
          * Rules
          */ 
-        public static int minTonerLevel = -1;
-        public static bool? unavaliablePrinters = null;
-        public static bool? scanErrors = null;
+        public static int R_minTonerLevel = -1;
+        public static bool? R_unavaliablePrinters = null;
+        public static bool? R_scanErrors = null;
         // Default values
-        private const int _DEF_minTonerLevel = 20;
-        private const bool _DEF_unavaliablePrinters = true;
-        private const bool _DEF_scanErrors = true;
+        private const int _DEF_R_minTonerLevel = 20;
+        private const bool _DEF_R_unavaliablePrinters = true;
+        private const bool _DEF_R_scanErrors = true;
 
         /*
          * Properties
@@ -99,7 +99,7 @@ namespace PrinterStatusLogger
             string hex = Logger.BitCheck(new bool[]
             {
                 SmtpServer == "",
-                SmtpPort == -1,
+                SmtpPort == 0,
                 MessageRecipients == ""
             }, 1);
             if (hex != "0x00")
@@ -113,20 +113,20 @@ namespace PrinterStatusLogger
         }
         private static bool InitializeRules()
         {
-            if (minTonerLevel == -1)
+            if (R_minTonerLevel == -1)
             {
-                Logger.Log(LogType.WARNING, "Alerter Rules: minTonerLevel is not set, default value [" + _DEF_minTonerLevel + "] will be used");
-                minTonerLevel = _DEF_minTonerLevel;
+                Logger.Log(LogType.WARNING, "Alerter Rules: minTonerLevel is not set, default value [" + _DEF_R_minTonerLevel + "] will be used");
+                R_minTonerLevel = _DEF_R_minTonerLevel;
             }
-            if (unavaliablePrinters == null)
+            if (R_unavaliablePrinters == null)
             {
-                Logger.Log(LogType.WARNING, "Alerter Rules: unavaliablePrinters is not set, default value [" + _DEF_unavaliablePrinters.ToString() + "] will be used");
-                unavaliablePrinters = _DEF_unavaliablePrinters;
+                Logger.Log(LogType.WARNING, "Alerter Rules: unavaliablePrinters is not set, default value [" + _DEF_R_unavaliablePrinters.ToString() + "] will be used");
+                R_minTonerLevel = _DEF_R_minTonerLevel;
             }
-            if (scanErrors == null)
+            if (R_scanErrors == null)
             {
-                Logger.Log(LogType.WARNING, "Alerter Rules: scanErrors is not set, default value [" + _DEF_scanErrors.ToString() + "] will be used");
-                scanErrors = _DEF_scanErrors;
+                Logger.Log(LogType.WARNING, "Alerter Rules: scanErrors is not set, default value [" + _DEF_R_scanErrors.ToString() + "] will be used");
+                R_minTonerLevel = _DEF_R_minTonerLevel;
             }
             return true;
         }
@@ -140,7 +140,7 @@ namespace PrinterStatusLogger
                 _alertUnavaliableWebInterfaceBuffer.Add(printer);
                 return;
             }
-            if (tonerLevel <= minTonerLevel)
+            if (tonerLevel <= R_minTonerLevel)
                 _alertTonerLevelBuffer.Add(new AlertTonerLevelPrinterObj(printer.Name, tonerLevel));
         }
         public static void AddError(Printer printer, string causedby)

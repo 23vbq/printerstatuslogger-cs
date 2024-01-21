@@ -7,6 +7,7 @@ namespace PrinterStatusLogger
     {
         V_INFO, // Low Level
         INFO,
+        V_WARNING,
         WARNING,
         ERROR,
         PRNT_INFO
@@ -17,8 +18,10 @@ namespace PrinterStatusLogger
         private static string logbuffer;
         private static Dictionary<LogType, ConsoleColor> logcolor = new Dictionary<LogType, ConsoleColor>()
         {
+            {LogType.V_INFO, ConsoleColor.Gray },
             {LogType.ERROR, ConsoleColor.DarkRed },
             {LogType.WARNING, ConsoleColor.Yellow },
+            {LogType.V_WARNING, ConsoleColor.DarkYellow },
             {LogType.PRNT_INFO, ConsoleColor.Green }
         };
 
