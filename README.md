@@ -3,13 +3,13 @@ Program to collect data from printers in your network.
 Allows you to automatically get data from printer web interface.
 
 ## Capabilities
-Report
+### Report
 - Log in console output
 - Log in `syslog` file
 - Alert through email
 - **PLANNED** Reports in CSV
 
-Printer scan
+### Printer scan
 - Get toner level
 - List unavaliable printers
 - List scan errors
