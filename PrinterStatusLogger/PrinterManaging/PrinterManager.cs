@@ -49,6 +49,7 @@
                 try
                 {
                     int tonerlevel = p.GetTonerLevel();
+                    Console.WriteLine(p.Ping().ToString());
                     if (tonerlevel != -1)
                         Logger.Log(p, tonerlevel);
                     Alerter.Handler(p, tonerlevel , tonerlevel > -1);

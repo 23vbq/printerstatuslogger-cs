@@ -1,4 +1,7 @@
-﻿namespace PrinterStatusLogger.PrinterManaging
+﻿using System.Net.NetworkInformation;
+using System.Text.RegularExpressions;
+
+namespace PrinterStatusLogger.PrinterManaging
 {
     public class Printer
     {
@@ -32,6 +35,14 @@
                 throw new Exception("GetTonerLevel exited with an error");
             }
             return Model.ReadTonerLevelFromResponse(content);
+        }
+        public bool Ping()
+        {
+            Ping p = new Ping();
+            string addr = Regex.Replace(Address, @"(https://)|(http://)", "");
+            addr = addr.Substring(0, addr.Length - 1);
+            PingReply reply = p.Send(addr);
+            return reply.Status == IPStatus.Success; // TODO do not works properly, and consider how to implement
         }
         private string? GetPrinterWebInterface()
         {
