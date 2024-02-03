@@ -1,7 +1,5 @@
 ﻿using PrinterStatusLogger.PrinterManaging;
-using System.IO;
 using System.Reflection;
-using Windows.Media.Protection.PlayReady;
 using Windows.Security.Credentials;
 
 namespace PrinterStatusLogger.Config

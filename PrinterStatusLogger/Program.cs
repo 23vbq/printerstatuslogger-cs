@@ -1,17 +1,27 @@
 ﻿//using PrinterStatusLogger.CommandHandling;
 using PrinterStatusLogger.Config;
 using PrinterStatusLogger.PrinterManaging;
-using Windows.ApplicationModel.Contacts;
 
 namespace PrinterStatusLogger
 {
     internal class Program
     {
-        public const string version = "0.2";
+        public const string version = "0.3";
+
+        static PrinterManager printerManager = null; // Is this safe?
+        static ConfigManager configManager = null;   // Maybe need to make this classes as static
 
         //public static bool exitCalled = false; // OLD FOR COMMAND HANDLER
         public static bool userMode = false;
         public static bool noAlertMode = false;
+
+        private static readonly Dictionary<string, Action> programArgs = new Dictionary<string, Action>
+        {
+            { "-h", () => { PrintHelp(); } },
+            { "-u", () => { userMode = true; } },
+            { "-na", () => { noAlertMode = true; } },
+            { "-m",  ModelListingMode}
+        };
 
         static void Main(string[] args)
         {
@@ -28,31 +38,20 @@ namespace PrinterStatusLogger
             }
             commandHandler.Handle(args);*/
             Logger.Log(LogType.INFO, "PrinterStatusLogger v" + version + " " + args.ToString());
-            PrinterManager printerManager = new PrinterManager();
-            ConfigManager configManager = new ConfigManager();
+            printerManager = new PrinterManager();
+            configManager = new ConfigManager();
             /*
              * Args check
              */
             if (args.Length > 0 )
             {
-                if (args.Contains("-u"))
-                    userMode = true;
-                if (args.Contains("-m"))
+                foreach ( string arg in args )
                 {
-                    try
-                    {
-                        configManager.LoadPrinterModels(printerManager.RegisterPrinterModel);
-                    }
-                    catch (Exception ex)
-                    {
-                        FatalError(ex);
-                    }
-                    printerManager.ListPrinterModels();
-                    Logger.Log(LogType.WARNING, "Listing model mode. Aborting other work...");
-                    Environment.Exit(0);
+                    if (programArgs.ContainsKey(arg))
+                        programArgs[arg].Invoke();
+                    else
+                        PrintHelp(arg);
                 }
-                if (args.Contains("-na"))
-                    noAlertMode = true;
             }
             /*
              * Activated flags info
@@ -83,6 +82,38 @@ namespace PrinterStatusLogger
             Logger.Log(LogType.ERROR, ex.Message);
             Logger.Log(LogType.ERROR, "Fatal error! Aborting...");
             Environment.Exit(1);
+        }
+        /// <summary>
+        /// Prints help only to console output
+        /// </summary>
+        /// <param name="unknownArg">If unknownArg is specified it will print this with invalid argument info</param>
+        static void PrintHelp(string? unknownArg = null)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            if (unknownArg != null )
+                Console.Write("Invalid argument: " + unknownArg + "\n");
+            Console.WriteLine("Usage: printerstatuslogger.exe [arguments]");
+            Console.WriteLine("\t-h\tHelp - shows this dialog and exits");
+            Console.WriteLine("\t-u\tUser Mode - Program can ask user certain things (like creating default config), and wait for user input");
+            Console.WriteLine("\t-na\tNo Alert Mode - Disables whole Alerter module");
+            Console.WriteLine("\t-m\tModel List - Only lists loaded printer models and then exits");
+            Console.WriteLine("\nDocs: https://github.com/23vbq/printerstatuslogger-cs");
+            Console.ForegroundColor = ConsoleColor.White;
+            Environment.Exit(0);
+        }
+        static void ModelListingMode()
+        {
+            try
+            {
+                configManager.LoadPrinterModels(printerManager.RegisterPrinterModel);
+            }
+            catch (Exception ex)
+            {
+                FatalError(ex);
+            }
+            printerManager.ListPrinterModels();
+            Logger.Log(LogType.WARNING, "Model listing mode. Aborting other work...");
+            Environment.Exit(0);
         }
     }
 }
