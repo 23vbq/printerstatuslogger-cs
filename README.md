@@ -57,6 +57,7 @@ readtonerlevelregex=[Regex to find toner level [0-9]{1,3}]
 ```
 
 ## TODO
+- Documentation
 - Reports Module - to report data in csv files
 - ~~GetTonerLevel() Improvement - better response from function when error occurs~~ - implemented, need testing
 - Printer Scan Improvement
