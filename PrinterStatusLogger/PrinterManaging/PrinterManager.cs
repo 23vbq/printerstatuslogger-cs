@@ -1,4 +1,6 @@
-﻿namespace PrinterStatusLogger.PrinterManaging
+﻿using System.Net;
+
+namespace PrinterStatusLogger.PrinterManaging
 {
     public class PrinterManager
     {
@@ -46,16 +48,16 @@
         {
             foreach(Printer p in _printers)
             {
+                Logger.Log(LogType.V_INFO, "Scanning [" + p.Name + "; " +  p.Address + "]");
                 try
                 {
                     int tonerlevel = p.GetTonerLevel();
-                    Console.WriteLine(p.Ping().ToString());
                     if (tonerlevel != -1)
                         Logger.Log(p, tonerlevel);
-                    Alerter.Handler(p, tonerlevel , tonerlevel > -1);
+                    Alerter.Handler(p, tonerlevel);
                 } catch (Exception ex)
                 {
-                    Logger.Log(LogType.ERROR, ex.Message);
+                    Logger.Log(LogType.ERROR, ex.Message + " at " + p.Address);
                     Alerter.AddError(p, ex.Message);
                 }
             }

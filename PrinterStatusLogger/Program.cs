@@ -6,7 +6,7 @@ namespace PrinterStatusLogger
 {
     internal class Program
     {
-        public const string version = "0.3";
+        public const string version = "0.4";
 
         static PrinterManager printerManager = null; // Is this safe?
         static ConfigManager configManager = null;   // Maybe need to make this classes as static

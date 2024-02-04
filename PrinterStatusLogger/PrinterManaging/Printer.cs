@@ -8,6 +8,7 @@ namespace PrinterStatusLogger.PrinterManaging
         public string Name;
         public string Address { get; private set; }
         public PrinterModel Model { get; private set; }
+        public bool avaliable { get; private set; } = true; // By default is true
 
         public Printer(string name, string address, PrinterModel model)
         {
@@ -26,8 +27,9 @@ namespace PrinterStatusLogger.PrinterManaging
                 content = GetPrinterWebInterface();
             } catch (Exception ex)
             {
-                Logger.Log(LogType.ERROR, ex.Message + " at " + Address);
-                return -1;
+                //Logger.Log(LogType.ERROR, ex.Message + " at " + Address);
+                Ping();
+                throw;
             }
             if (content == null)
             {
@@ -38,11 +40,14 @@ namespace PrinterStatusLogger.PrinterManaging
         }
         public bool Ping()
         {
+            Logger.Log(LogType.V_INFO, "Pinging " + Address);
             Ping p = new Ping();
             string addr = Regex.Replace(Address, @"(https://)|(http://)", "");
             addr = addr.Substring(0, addr.Length - 1);
             PingReply reply = p.Send(addr);
-            return reply.Status == IPStatus.Success; // TODO do not works properly, and consider how to implement
+            avaliable = reply.Status == IPStatus.Success;
+            Logger.Log(LogType.WARNING, "Ping of " +  Address + " " + (avaliable ? "successful" : "failed"));
+            return avaliable; // TODO do not works properly, and consider how to implement
         }
         private string? GetPrinterWebInterface()
         {

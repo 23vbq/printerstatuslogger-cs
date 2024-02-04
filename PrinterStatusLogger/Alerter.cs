@@ -131,13 +131,16 @@ namespace PrinterStatusLogger
             return true;
         }
 
-        public static void Handler(Printer printer, int tonerLevel, bool avalible)
+        public static void Handler(Printer printer, int tonerLevel)
         {
             if (Program.noAlertMode)
                 return;
-            if (!avalible)
+            if (tonerLevel < 0)
             {
-                _alertUnavaliableWebInterfaceBuffer.Add(printer);
+                if (printer.avaliable)
+                    AddError(printer, "Ping failed"); // FIXME is this needed here?
+                else
+                    _alertUnavaliableWebInterfaceBuffer.Add(printer);
                 return;
             }
             if (tonerLevel <= R_minTonerLevel)
@@ -145,7 +148,7 @@ namespace PrinterStatusLogger
         }
         public static void AddError(Printer printer, string causedby)
         {
-            _alertErrorBuffer.Add(new AlertErrorPrinterObj(printer.Name, printer.Address, causedby));
+            _alertErrorBuffer.Add(new AlertErrorPrinterObj(printer.Name, printer.Address, causedby + " | " + (printer.avaliable ? "Ping successful" : "Ping failed")));
         }
 
         public static void Send()

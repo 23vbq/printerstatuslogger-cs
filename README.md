@@ -61,7 +61,11 @@ readtonerlevelregex=[Regex to find toner level [0-9]{1,3}]
 - ~~GetTonerLevel() Improvement - better response from function when error occurs~~ - implemented, need testing
 - Printer Scan Improvement
   - Multitasking (to not wait when f.ex. when cannot connect to address)
-  - Try to ping when http not response
+  - ~~Try to ping when http not response~~ - implemented
+    - Testing
+    - Cleanup code
+    - Move failed pings to unavaliable interface
+    - *Maybe option to disable pings in config or in args*
 - ~~ReadConfig() - rewrite to create kvp's list for better config reading~~ - implemented, need testing before deleting old functions
 - Logger
   - Logs in syslog format
