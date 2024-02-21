@@ -177,21 +177,32 @@ namespace PrinterStatusLogger
             bool newline = false;
             if (_alertTonerLevelBuffer.Count != 0)
             {
-                AddPrinterTonerAlert(sb);
+                //AddPrinterTonerAlert(sb);
+                AddAlertTable<AlertTonerLevelPrinterObj>(sb, "Low toner level:", new string[] { "Name", "Toner Level" }, _alertTonerLevelBuffer, (x) =>
+                {
+                    return "<td> " + x.Name + " </td><td> " + x.TonerLevel + "%</td>";
+                });
                 isGood = false;
                 newline = true;
             }
             if (_alertUnavaliableWebInterfaceBuffer.Count != 0)
             {
                 if (newline) sb.Append("<br>");
-                AddUnavalibleWebInterfaceAlert(sb);
+                //AddUnavalibleWebInterfaceAlert(sb);
+                AddAlertTable<Printer>(sb, "Unavaliable web interface:", new string[] { "Name", "Address" }, _alertUnavaliableWebInterfaceBuffer, (x) =>
+                {
+                    return "<td> " + x.Name + " </td><td> " + x.Address + "</td>";
+                });
                 isGood = false;
                 newline = true;
             }
             if (_alertErrorBuffer.Count != 0)
             {
                 if (newline) sb.Append("<br>");
-                AddErrorAlert(sb);
+                AddAlertTable<AlertErrorPrinterObj>(sb, "Error when scanning:", new string[] { "Name", "Address", "Caused by" }, _alertErrorBuffer, (x) =>
+                {
+                    return "<td> " + x.Name + " </td><td> " + x.Address + "</td><td>" + x.CausedBy + "</td>";
+                });
                 isGood = false;
                 newline = true;
             }
@@ -216,6 +227,21 @@ namespace PrinterStatusLogger
         /*
          * Alert Build
          */
+        private static void AddAlertTable<T>(StringBuilder sb, string title, string[] headers, List<T> alertList, Func<T, string> rowBuilder)
+        {
+            // Prepare table
+            sb.Append("<b>" + title + "</b><br>");
+            sb.Append("<table><tr>");
+            // Build headers
+            foreach (string header in headers)
+                sb.Append("<th>" + header + "</th>");
+            sb.Append("</tr>");
+            // Build rows
+            foreach (T x in alertList)
+                sb.Append("<tr>" + rowBuilder.Invoke(x) + "</tr>");
+            // Close table
+            sb.Append("</table>");
+        }
         private static void AddPrinterTonerAlert(StringBuilder sb)
         {
             sb.Append("<b>Low toner level: </b><br>");
