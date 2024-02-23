@@ -227,46 +227,28 @@ namespace PrinterStatusLogger
         /*
          * Alert Build
          */
-        private static void AddAlertTable<T>(StringBuilder sb, string title, string[] headers, List<T> alertList, Func<T, string> rowBuilder)
+        /// <summary>
+        /// Creates table in alert message from provided data list.
+        /// </summary>
+        /// <typeparam name="T">Type of data</typeparam>
+        /// <param name="sb">Message string builder in which table will be created</param>
+        /// <param name="title">Title of table</param>
+        /// <param name="headers">Headers of table</param>
+        /// <param name="alertList">Data list of alerts</param>
+        /// <param name="rowBuilder">Lambda function to combine properties in one row<br></br>Each column should be in HTML td tag</param>
+        private static void AddAlertTable<T>(StringBuilder sb, string title, string[] headers, List<T> dataList, Func<T, string> rowBuilder)
         {
             // Prepare table
             sb.Append("<b>" + title + "</b><br>");
             sb.Append("<table><tr>");
-            // Build headers
+            // Build headers row
             foreach (string header in headers)
                 sb.Append("<th>" + header + "</th>");
             sb.Append("</tr>");
             // Build rows
-            foreach (T x in alertList)
+            foreach (T x in dataList)
                 sb.Append("<tr>" + rowBuilder.Invoke(x) + "</tr>");
             // Close table
-            sb.Append("</table>");
-        }
-        private static void AddPrinterTonerAlert(StringBuilder sb)
-        {
-            sb.Append("<b>Low toner level: </b><br>");
-            sb.Append("<table>");
-            sb.Append("<tr><th>Name</th><th>Toner Level</th></tr>");
-            foreach (var x in _alertTonerLevelBuffer)
-                sb.Append("<tr><td>" + x.Name + "</td><td>" + x.TonerLevel + "%</td></tr>");
-            sb.Append("</table>");
-        }
-        private static void AddUnavalibleWebInterfaceAlert(StringBuilder sb)
-        {
-            sb.Append("<b>Unavaliable web interface: </b><br>");
-            sb.Append("<table>");
-            sb.Append("<tr><th>Name</th><th>Address</th></tr>");
-            foreach (var x in _alertUnavaliableWebInterfaceBuffer)
-                sb.Append("<tr><td>" + x.Name + "</td><td>" + x.Address + "</td></tr>");
-            sb.Append("</table>");
-        }
-        private static void AddErrorAlert(StringBuilder sb)
-        {
-            sb.Append("<b>Error when scanning: </b><br>");
-            sb.Append("<table>");
-            sb.Append("<tr><th>Name</th><th>Address</th><th>Caused by</th></tr>");
-            foreach (var x in _alertErrorBuffer)
-                sb.Append("<tr><td>" + x.Name + "</td><td>" + x.Address + "</td><td>" + x.CausedBy + "</td></tr>");
             sb.Append("</table>");
         }
     }
