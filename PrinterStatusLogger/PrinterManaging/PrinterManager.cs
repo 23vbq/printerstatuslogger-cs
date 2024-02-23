@@ -54,7 +54,8 @@ namespace PrinterStatusLogger.PrinterManaging
                     int tonerlevel = p.GetTonerLevel();
                     if (tonerlevel != -1)
                         Logger.Log(p, tonerlevel);
-                    Alerter.Handler(p, tonerlevel);
+                    if (Alerter.Handler(p, tonerlevel))
+                        Logger.Log(LogType.V_WARNING, "Printer meet some alerter condition.");
                 } catch (Exception ex)
                 {
                     Logger.Log(LogType.ERROR, ex.Message + " at " + p.Address);

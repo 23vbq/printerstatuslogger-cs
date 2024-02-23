@@ -12,15 +12,17 @@ namespace PrinterStatusLogger
         static ConfigManager configManager = null;   // Maybe need to make this classes as static
 
         //public static bool exitCalled = false; // OLD FOR COMMAND HANDLER
-        public static bool userMode = false;
-        public static bool noAlertMode = false;
+        public static bool userMode { private set; get; } = false;
+        public static bool noAlertMode { private set; get; } = false;
+        public static bool verboseMode { private set; get; } = false;
 
         private static readonly Dictionary<string, Action> programArgs = new Dictionary<string, Action>
         {
             { "-h", () => { PrintHelp(); } },
             { "-u", () => { userMode = true; } },
             { "-na", () => { noAlertMode = true; } },
-            { "-m",  ModelListingMode}
+            { "-m",  ModelListingMode},
+            { "-v", () => { verboseMode = true; } }
         };
 
         static void Main(string[] args)
@@ -37,7 +39,7 @@ namespace PrinterStatusLogger
                 return;
             }
             commandHandler.Handle(args);*/
-            Logger.Log(LogType.INFO, "PrinterStatusLogger v" + version + " " + args.ToString());
+            Logger.Log(LogType.INFO, "PrinterStatusLogger v" + version + " " + string.Join(' ', args));
             printerManager = new PrinterManager();
             configManager = new ConfigManager();
             /*
@@ -45,12 +47,13 @@ namespace PrinterStatusLogger
              */
             if (args.Length > 0 )
             {
-                foreach ( string arg in args )
+                int n = args.Length;
+                for (int i = 0; i < n; i++)
                 {
-                    if (programArgs.ContainsKey(arg))
-                        programArgs[arg].Invoke();
+                    if (programArgs.ContainsKey(args[i]))
+                        programArgs[args[i]].Invoke();
                     else
-                        PrintHelp(arg);
+                        PrintHelp(args[i]);
                 }
             }
             /*
@@ -60,6 +63,8 @@ namespace PrinterStatusLogger
                 Logger.Log(LogType.WARNING, "UserMode is activated. Program will be able to wait for user input!");
             if (noAlertMode)
                 Logger.Log(LogType.WARNING, "NoAlertMode is activated. No alerts will be sent!");
+            if (verboseMode)
+                Logger.Log(LogType.WARNING, "VerboseMode is activated. Program will return more logs.");
             /*
              * Program part
              */
@@ -97,6 +102,7 @@ namespace PrinterStatusLogger
             Console.WriteLine("\t-u\tUser Mode - Program can ask user certain things (like creating default config), and wait for user input");
             Console.WriteLine("\t-na\tNo Alert Mode - Disables whole Alerter module");
             Console.WriteLine("\t-m\tModel List - Only lists loaded printer models and then exits");
+            Console.WriteLine("\t-v\tVerbose Mode - Program will return more logs");
             Console.WriteLine("\nDocs: https://github.com/23vbq/printerstatuslogger-cs");
             Console.ForegroundColor = ConsoleColor.White;
             Environment.Exit(0);

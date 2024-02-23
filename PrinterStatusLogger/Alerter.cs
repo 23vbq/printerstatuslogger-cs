@@ -130,21 +130,30 @@ namespace PrinterStatusLogger
             }
             return true;
         }
-
-        public static void Handler(Printer printer, int tonerLevel)
+        /// <summary>
+        /// Handles alerter function. Checks if alerter conditions are meet.<br></br>Should be used to everything that should be produced in alert.
+        /// </summary>
+        /// <param name="printer"></param>
+        /// <param name="tonerLevel"></param>
+        /// <returns><b>True</b> - some alerter conditions meet<br></br><b>False</b> - no conditions meet or noAlertMode enabled</returns>
+        public static bool Handler(Printer printer, int tonerLevel)
         {
             if (Program.noAlertMode)
-                return;
+                return false;
             if (tonerLevel < 0)
             {
                 if (printer.avaliable)
                     AddError(printer, "Ping failed"); // FIXME is this needed here?
                 else
                     _alertUnavaliableWebInterfaceBuffer.Add(printer);
-                return;
+                return true;
             }
             if (tonerLevel <= R_minTonerLevel)
+            {
                 _alertTonerLevelBuffer.Add(new AlertTonerLevelPrinterObj(printer.Name, tonerLevel));
+                return true;
+            }
+            return false;
         }
         public static void AddError(Printer printer, string causedby)
         {

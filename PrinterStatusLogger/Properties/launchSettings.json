@@ -2,7 +2,7 @@
   "profiles": {
     "PrinterStatusLogger": {
       "commandName": "Project",
-      "commandLineArgs": "-u"
+      "commandLineArgs": "-u -na -v"
     }
   }
 }

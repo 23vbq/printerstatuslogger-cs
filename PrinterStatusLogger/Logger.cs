@@ -39,6 +39,8 @@ namespace PrinterStatusLogger
         /// <param name="message"></param>
         public static void Log(LogType type, string message)
         {
+            if (!Program.verboseMode && IsVerbose(type))
+                return;
             logbuffer = BuildLog(type, message);
             SetConsoleColor(type);
             Console.WriteLine(logbuffer);
@@ -71,6 +73,16 @@ namespace PrinterStatusLogger
                 return;
             }
             Console.ForegroundColor = logcolor[type];
+        }
+        /// <summary>
+        /// Checks if log is verbose type
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        private static bool IsVerbose(LogType type)
+        {
+            return type == LogType.V_INFO ||
+                   type == LogType.V_WARNING;
         }
         /// <summary>
         /// Creates string containing hex representation of bools array. It allows to easy check lot of bools with error code output.<br></br>

@@ -23,7 +23,8 @@ Avaliable arguments:
 - `-h` Help - shows dialogs with listed arguments and link to github
 - `-u` User Mode - Program can ask user certain things (like creating default config), and wait for user input
 - `-na` No Alert Mode - Disables whole Alerter module
-- `-l` Model List - Only lists loaded printer models and then exits
+- `-m` Model List - Only lists loaded printer models and then exits
+- `-v` Verbose Mode - Program will return more logs
 
 ## Configuration
 
@@ -75,9 +76,9 @@ readtonerlevelregex=[Regex to find toner level [0-9]{1,3}]
   - Installer
   - Portable *(maybe for this option to use credentials every run, instead storing in keymgr.dll)*
 - Option to download models form github directly in program
-- ~~Combine all Add__Alert functions to one function~~ - implemented, need testing
-- Run arguments
-  - Verbose mode that logs additional info
+- ~~Combine all Add__Alert functions to one function~~
+- ~~Run arguments~~
+  - ~~Verbose mode that logs additional info~~
   - ~~Help~~
 - *Config as class*
 - *ExchangeOnline Server support - in future*
