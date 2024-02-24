@@ -16,7 +16,7 @@ namespace PrinterStatusLogger
         public static bool noAlertMode { private set; get; } = false;
         public static bool verboseMode { private set; get; } = false;
 
-        private static readonly Dictionary<string, Action> programArgs = new Dictionary<string, Action>
+        private static readonly Dictionary<string, Action> s_programArgs = new Dictionary<string, Action>
         {
             { "-h", () => { PrintHelp(); } },
             { "-u", () => { userMode = true; } },
@@ -24,6 +24,12 @@ namespace PrinterStatusLogger
             { "-m",  ModelListingMode},
             { "-v", () => { verboseMode = true; } }
         };
+
+        /*public static readonly Dictionary<string, UInt16> s_wellKnownPorts = new Dictionary<string, ushort> // Probably not needed
+        {
+            { "http://", 80 },
+            { "https://", 443 }
+        };*/
 
         static void Main(string[] args)
         {
@@ -50,8 +56,8 @@ namespace PrinterStatusLogger
                 int n = args.Length;
                 for (int i = 0; i < n; i++)
                 {
-                    if (programArgs.ContainsKey(args[i]))
-                        programArgs[args[i]].Invoke();
+                    if (s_programArgs.ContainsKey(args[i]))
+                        s_programArgs[args[i]].Invoke();
                     else
                         PrintHelp(args[i]);
                 }

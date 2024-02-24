@@ -66,7 +66,7 @@ readtonerlevelregex=[Regex to find toner level [0-9]{1,3}]
   - ~~Try to ping when http not response~~ - implemented
     - Testing
     - Cleanup code
-    - Move failed pings to unavaliable interface
+    - ~~Move failed pings to unavaliable interface~~ - implemented, need testing
     - *Maybe option to disable pings in config or in args*
 - ~~ReadConfig() - rewrite to create kvp's list for better config reading~~ - implemented, need testing before deleting old functions
 - Logger

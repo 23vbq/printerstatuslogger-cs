@@ -27,7 +27,6 @@ namespace PrinterStatusLogger.PrinterManaging
                 content = GetPrinterWebInterface();
             } catch (Exception ex)
             {
-                //Logger.Log(LogType.ERROR, ex.Message + " at " + Address);
                 Ping();
                 throw;
             }
@@ -61,6 +60,24 @@ namespace PrinterStatusLogger.PrinterManaging
                 content = result.Result.Content.ReadAsStringAsync().Result;
             }
             return content;
+        }
+        public UInt16 GetPort()
+        {
+            Match m = Regex.Match(this.Address, @"(?<=:)[0-9]{1,5}");
+            if (m.Success)
+                return UInt16.Parse(m.Value);
+            else // It is very not optimized - bad
+            {
+                Logger.Log(LogType.V_INFO, "GetPort returns well known protocol port");
+                if (this.Address.StartsWith("http://"))
+                    return 80;
+                else if (this.Address.StartsWith("https://"))
+                    return 443;
+                else
+                {
+                    throw new Exception("Port is not known");
+                }
+            }
         }
     }
 }

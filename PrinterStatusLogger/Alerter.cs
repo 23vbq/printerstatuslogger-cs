@@ -142,10 +142,10 @@ namespace PrinterStatusLogger
                 return false;
             if (tonerLevel < 0)
             {
-                if (printer.avaliable)
+                /*if (printer.avaliable)
                     AddError(printer, "Ping failed"); // FIXME is this needed here?
-                else
-                    _alertUnavaliableWebInterfaceBuffer.Add(printer);
+                else*/
+                _alertUnavaliableWebInterfaceBuffer.Add(printer);
                 return true;
             }
             if (tonerLevel <= R_minTonerLevel)
@@ -157,7 +157,10 @@ namespace PrinterStatusLogger
         }
         public static void AddError(Printer printer, string causedby)
         {
-            _alertErrorBuffer.Add(new AlertErrorPrinterObj(printer.Name, printer.Address, causedby + " | " + (printer.avaliable ? "Ping successful" : "Ping failed")));
+            if (!printer.avaliable)
+                _alertUnavaliableWebInterfaceBuffer.Add(printer);
+            else
+                _alertErrorBuffer.Add(new AlertErrorPrinterObj(printer.Name, printer.Address, causedby + " | " + (printer.avaliable ? "Ping successful" : "Ping failed")));
         }
 
         public static void Send()
