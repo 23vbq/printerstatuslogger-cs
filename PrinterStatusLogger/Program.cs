@@ -11,7 +11,6 @@ namespace PrinterStatusLogger
         static PrinterManager printerManager = null; // Is this safe?
         static ConfigManager configManager = null;   // Maybe need to make this classes as static
 
-        //public static bool exitCalled = false; // OLD FOR COMMAND HANDLER
         public static bool userMode { private set; get; } = false;
         public static bool noAlertMode { private set; get; } = false;
         public static bool verboseMode { private set; get; } = false;
@@ -33,18 +32,6 @@ namespace PrinterStatusLogger
 
         static void Main(string[] args)
         {
-            /*CommandHandler commandHandler = new CommandHandler();
-            if (args.Length == 0 )
-            {
-                while ( !exitCalled )
-                {
-                    Console.Write("> ");
-                    string command = Console.ReadLine();
-                    commandHandler.Handle(command.Split(' '));
-                }
-                return;
-            }
-            commandHandler.Handle(args);*/
             Logger.Log(LogType.INFO, "PrinterStatusLogger v" + version + " " + string.Join(' ', args));
             printerManager = new PrinterManager();
             configManager = new ConfigManager();
@@ -76,10 +63,9 @@ namespace PrinterStatusLogger
              */
             try
             {
-                configManager.NEW_LoadPrinterModels(printerManager.RegisterPrinterModel);
-                //configManager.LoadPrinterModels(printerManager.RegisterPrinterModel);
+                configManager.LoadPrinterModels(printerManager.RegisterPrinterModel);
                 configManager.LoadPrinters(printerManager);
-                Alerter.Initialize(configManager.GetAlerterCreds(), configManager.NEW_LoadAlerter);
+                Alerter.Initialize(configManager.GetAlerterCreds(), configManager.LoadAlerter);
                 Logger.Log(LogType.INFO, "Starting printers scan");
                 printerManager.RunPrinterScan();
                 Alerter.Send();

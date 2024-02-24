@@ -1,0 +1,16 @@
+// Global
+public static bool exitCalled = false; // OLD FOR COMMAND HANDLER
+
+// Main()
+CommandHandler commandHandler = new CommandHandler();
+if (args.Length == 0 )
+{
+    while ( !exitCalled )
+    {
+        Console.Write("> ");
+        string command = Console.ReadLine();
+        commandHandler.Handle(command.Split(' '));
+    }
+    return;
+}
+commandHandler.Handle(args);
