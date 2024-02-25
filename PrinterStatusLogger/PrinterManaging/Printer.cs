@@ -9,7 +9,7 @@ namespace PrinterStatusLogger.PrinterManaging
         public string Name;
         public string Address { get; private set; }
         public PrinterModel Model { get; private set; }
-        public bool avaliable { get; private set; } = true; // By default is true
+        public PrinterAvailability avaliable { get; private set; } = new PrinterAvailability { Icmp = true, PortOpen = true}; // By default is true
 
         public Printer(string name, string address, PrinterModel model)
         {
@@ -43,9 +43,9 @@ namespace PrinterStatusLogger.PrinterManaging
             Logger.Log(LogType.V_INFO, "Pinging " + Address);
             Ping p = new Ping();
             PingReply reply = p.Send(GetIP());
-            avaliable = reply.Status == IPStatus.Success;
-            Logger.Log(LogType.WARNING, "Ping of " +  Address + " " + (avaliable ? "successful" : "failed"));
-            return avaliable; // TODO do not works properly, and consider how to implement
+            avaliable.Icmp = reply.Status == IPStatus.Success;
+            Logger.Log(LogType.WARNING, "Ping of " +  Address + " " + (avaliable.Icmp ? "successful" : "failed"));
+            return avaliable.Icmp; // TODO do not works properly, and consider how to implement
         }
         private string? GetPrinterWebInterface()
         {
@@ -69,11 +69,13 @@ namespace PrinterStatusLogger.PrinterManaging
                     var result = client.BeginConnect(GetIP(), GetPort(), null, null);
                     var success = result.AsyncWaitHandle.WaitOne(Program.s_connectionTimeout);
                     client.EndConnect(result);
-                    return success;
+                    avaliable.PortOpen = success;
+                    return avaliable.PortOpen;
                 }
             } catch
             {
-                return false;
+                avaliable.PortOpen = false;
+                return avaliable.PortOpen;
             }
         }
         public string GetIP()

@@ -68,6 +68,8 @@ readtonerlevelregex=[Regex to find toner level [0-9]{1,3}]
     - Cleanup code
     - ~~Move failed pings to unavaliable interface~~ - implemented, need testing
     - *Maybe option to disable pings in config or in args*
+  - ~~Check if port is open~~
+    - Implement in alerter
 - ~~ReadConfig() - rewrite to create kvp's list for better config reading~~ - implemented, need testing before deleting old functions
 - Logger
   - Logs in syslog format
