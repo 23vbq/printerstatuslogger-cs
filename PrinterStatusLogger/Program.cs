@@ -29,6 +29,7 @@ namespace PrinterStatusLogger
             { "http://", 80 },
             { "https://", 443 }
         };*/
+        public static readonly int s_connectionTimeout = 4 * 1000;
 
         static void Main(string[] args)
         {

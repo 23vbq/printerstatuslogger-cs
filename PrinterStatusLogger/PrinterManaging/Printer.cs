@@ -1,4 +1,5 @@
 ﻿using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Text.RegularExpressions;
 
 namespace PrinterStatusLogger.PrinterManaging
@@ -41,9 +42,7 @@ namespace PrinterStatusLogger.PrinterManaging
         {
             Logger.Log(LogType.V_INFO, "Pinging " + Address);
             Ping p = new Ping();
-            string addr = Regex.Replace(Address, @"(https://)|(http://)", "");
-            addr = addr.Substring(0, addr.Length - 1);
-            PingReply reply = p.Send(addr);
+            PingReply reply = p.Send(GetIP());
             avaliable = reply.Status == IPStatus.Success;
             Logger.Log(LogType.WARNING, "Ping of " +  Address + " " + (avaliable ? "successful" : "failed"));
             return avaliable; // TODO do not works properly, and consider how to implement
@@ -60,6 +59,29 @@ namespace PrinterStatusLogger.PrinterManaging
                 content = result.Result.Content.ReadAsStringAsync().Result;
             }
             return content;
+        }
+        public bool IsPortOpen()
+        {
+            try
+            {
+                using (TcpClient client = new TcpClient())
+                {
+                    var result = client.BeginConnect(GetIP(), GetPort(), null, null);
+                    var success = result.AsyncWaitHandle.WaitOne(Program.s_connectionTimeout);
+                    client.EndConnect(result);
+                    return success;
+                }
+            } catch
+            {
+                return false;
+            }
+        }
+        public string GetIP()
+        {
+            string result = Regex.Replace(this.Address, @"(https://)|(http://)", "");
+            if (result.EndsWith('/'))
+                result = result.Substring(0, result.Length - 1);
+            return result;
         }
         public UInt16 GetPort()
         {
