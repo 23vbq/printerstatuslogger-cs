@@ -157,10 +157,10 @@ namespace PrinterStatusLogger
         }
         public static void AddError(Printer printer, string causedby)
         {
-            if (!printer.avaliable)
+            if (!printer.Availability)
                 _alertUnavaliableWebInterfaceBuffer.Add(printer);
             else
-                _alertErrorBuffer.Add(new AlertErrorPrinterObj(printer.Name, printer.Address, causedby + " | " + (printer.avaliable ? "Ping successful" : "Ping failed")));
+                _alertErrorBuffer.Add(new AlertErrorPrinterObj(printer.Name, printer.Address, causedby + " | " + PrinterAvailability.WriteAvailabilityStatus(printer.Availability)));
         }
 
         public static void Send()
@@ -201,9 +201,9 @@ namespace PrinterStatusLogger
             {
                 if (newline) sb.Append("<br>");
                 //AddUnavalibleWebInterfaceAlert(sb);
-                AddAlertTable<Printer>(sb, "Unavaliable web interface:", new string[] { "Name", "Address" }, _alertUnavaliableWebInterfaceBuffer, (x) =>
+                AddAlertTable<Printer>(sb, "Unavaliable web interface:", new string[] { "Name", "Address", "Availability" }, _alertUnavaliableWebInterfaceBuffer, (x) =>
                 {
-                    return "<td> " + x.Name + " </td><td> " + x.Address + "</td>";
+                    return "<td> " + x.Name + " </td><td> " + x.Address + "</td><td>" + PrinterAvailability.WriteAvailabilityStatus(x.Availability) + "</td>";
                 });
                 isGood = false;
                 newline = true;

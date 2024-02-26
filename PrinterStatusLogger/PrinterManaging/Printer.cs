@@ -9,7 +9,7 @@ namespace PrinterStatusLogger.PrinterManaging
         public string Name;
         public string Address { get; private set; }
         public PrinterModel Model { get; private set; }
-        public PrinterAvailability avaliable { get; private set; } = new PrinterAvailability { Icmp = true, PortOpen = true}; // By default is true
+        public PrinterAvailability Availability { get; private set; } = new PrinterAvailability { Icmp = true, PortOpen = true}; // By default is true
 
         public Printer(string name, string address, PrinterModel model)
         {
@@ -29,6 +29,7 @@ namespace PrinterStatusLogger.PrinterManaging
             } catch (Exception ex)
             {
                 Ping();
+                IsPortOpen();
                 throw;
             }
             if (content == null)
@@ -43,12 +44,13 @@ namespace PrinterStatusLogger.PrinterManaging
             Logger.Log(LogType.V_INFO, "Pinging " + Address);
             Ping p = new Ping();
             PingReply reply = p.Send(GetIP());
-            avaliable.Icmp = reply.Status == IPStatus.Success;
-            Logger.Log(LogType.WARNING, "Ping of " +  Address + " " + (avaliable.Icmp ? "successful" : "failed"));
-            return avaliable.Icmp; // TODO do not works properly, and consider how to implement
+            Availability.Icmp = reply.Status == IPStatus.Success;
+            Logger.Log(LogType.WARNING, "Ping of " +  Address + " " + (Availability.Icmp ? "successful" : "failed"));
+            return Availability.Icmp; // TODO do not works properly, and consider how to implement
         }
         private string? GetPrinterWebInterface()
         {
+            Logger.Log(LogType.V_INFO, "Checking for open port " + Address);
             string? content = null;
             using (var client = new HttpClient())
             {
@@ -69,13 +71,13 @@ namespace PrinterStatusLogger.PrinterManaging
                     var result = client.BeginConnect(GetIP(), GetPort(), null, null);
                     var success = result.AsyncWaitHandle.WaitOne(Program.s_connectionTimeout);
                     client.EndConnect(result);
-                    avaliable.PortOpen = success;
-                    return avaliable.PortOpen;
+                    this.Availability.PortOpen = success;
+                    return this.Availability.PortOpen;
                 }
             } catch
             {
-                avaliable.PortOpen = false;
-                return avaliable.PortOpen;
+                this.Availability.PortOpen = false;
+                return this.Availability.PortOpen;
             }
         }
         public string GetIP()
