@@ -9,13 +9,15 @@ namespace PrinterStatusLogger.PrinterManaging
         public string Name;
         public string Address { get; private set; }
         public PrinterModel Model { get; private set; }
-        public PrinterAvailability Availability { get; private set; } = new PrinterAvailability { Icmp = true, PortOpen = true}; // By default is true
+        public PrinterAvailability Availability { get; private set; }
 
         public Printer(string name, string address, PrinterModel model)
         {
-            Name = name;
-            Address = address;
-            Model = model;
+            this.Name = name;
+            this.Address = address;
+            this.Model = model;
+
+            Availability = new PrinterAvailability(GetIP(this.Address), GetPort(this.Address));
         }
 
         public int GetTonerLevel()
@@ -26,10 +28,8 @@ namespace PrinterStatusLogger.PrinterManaging
             try
             {
                 content = GetPrinterWebInterface();
-            } catch (Exception ex)
+            } catch
             {
-                Ping();
-                IsPortOpen();
                 throw;
             }
             if (content == null)
@@ -38,15 +38,6 @@ namespace PrinterStatusLogger.PrinterManaging
                 throw new Exception("GetTonerLevel exited with an error");
             }
             return Model.ReadTonerLevelFromResponse(content);
-        }
-        public bool Ping()
-        {
-            Logger.Log(LogType.V_INFO, "Pinging " + Address);
-            Ping p = new Ping();
-            PingReply reply = p.Send(GetIP());
-            Availability.Icmp = reply.Status == IPStatus.Success;
-            Logger.Log(LogType.WARNING, "Ping of " +  Address + " " + (Availability.Icmp ? "successful" : "failed"));
-            return Availability.Icmp; // TODO do not works properly, and consider how to implement
         }
         private string? GetPrinterWebInterface()
         {
@@ -62,42 +53,24 @@ namespace PrinterStatusLogger.PrinterManaging
             }
             return content;
         }
-        public bool IsPortOpen()
+        public static string GetIP(string address)
         {
-            try
-            {
-                using (TcpClient client = new TcpClient())
-                {
-                    var result = client.BeginConnect(GetIP(), GetPort(), null, null);
-                    var success = result.AsyncWaitHandle.WaitOne(Program.s_connectionTimeout);
-                    client.EndConnect(result);
-                    this.Availability.PortOpen = success;
-                    return this.Availability.PortOpen;
-                }
-            } catch
-            {
-                this.Availability.PortOpen = false;
-                return this.Availability.PortOpen;
-            }
-        }
-        public string GetIP()
-        {
-            string result = Regex.Replace(this.Address, @"(https://)|(http://)", "");
+            string result = Regex.Replace(address, @"(https://)|(http://)", "");
             if (result.EndsWith('/'))
                 result = result.Substring(0, result.Length - 1);
             return result;
         }
-        public UInt16 GetPort()
+        public static UInt16 GetPort(string address)
         {
-            Match m = Regex.Match(this.Address, @"(?<=:)[0-9]{1,5}");
+            Match m = Regex.Match(address, @"(?<=:)[0-9]{1,5}");
             if (m.Success)
                 return UInt16.Parse(m.Value);
             else // It is very not optimized - bad
             {
-                Logger.Log(LogType.V_INFO, "GetPort returns well known protocol port");
-                if (this.Address.StartsWith("http://"))
+                Logger.Log(LogType.V_INFO, "GetPort(" + address + ") returns well known protocol port");
+                if (address.StartsWith("http://"))
                     return 80;
-                else if (this.Address.StartsWith("https://"))
+                else if (address.StartsWith("https://"))
                     return 443;
                 else
                 {
