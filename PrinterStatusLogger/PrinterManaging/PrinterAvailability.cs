@@ -1,5 +1,5 @@
-﻿using System.Net.NetworkInformation;
-using System.Net;
+﻿using PrinterStatusLogger.Logging;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 
 namespace PrinterStatusLogger.PrinterManaging

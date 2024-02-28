@@ -1,4 +1,5 @@
 ﻿using PrinterStatusLogger.PrinterManaging;
+using PrinterStatusLogger.Logging;
 using System.Reflection;
 using Windows.Security.Credentials;
 

@@ -1,17 +1,8 @@
 ﻿using PrinterStatusLogger.PrinterManaging;
 using System.Collections;
 
-namespace PrinterStatusLogger
+namespace PrinterStatusLogger.Logging
 {
-    public enum LogType
-    {
-        V_INFO, // Low Level
-        INFO,
-        V_WARNING,
-        WARNING,
-        ERROR,
-        PRNT_INFO
-    }
     public static class Logger
     {
         private static StreamWriter _logfileout;
@@ -39,7 +30,7 @@ namespace PrinterStatusLogger
         /// <param name="message"></param>
         public static void Log(LogType type, string message)
         {
-            if (!Program.verboseMode && IsVerbose(type))
+            if (Program.verboseMode > type)
                 return;
             logbuffer = BuildLog(type, message);
             SetConsoleColor(type);

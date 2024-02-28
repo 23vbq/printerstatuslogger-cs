@@ -1,4 +1,4 @@
-﻿using System.Net;
+﻿using PrinterStatusLogger.Logging;
 
 namespace PrinterStatusLogger.PrinterManaging
 {
@@ -29,7 +29,7 @@ namespace PrinterStatusLogger.PrinterManaging
         public void RegisterPrinterModel(PrinterModel model)
         {
             if (modelIdExists(model))
-            {
+            { 
                 Logger.Log(LogType.WARNING, "Cannot register PrinterModel - Model already exists: [" + model.Id + "; " + model.Name + "]");
                 return;
             }

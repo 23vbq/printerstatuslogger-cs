@@ -1,5 +1,4 @@
-﻿using System.Net.NetworkInformation;
-using System.Net.Sockets;
+﻿using PrinterStatusLogger.Logging;
 using System.Text.RegularExpressions;
 
 namespace PrinterStatusLogger.PrinterManaging

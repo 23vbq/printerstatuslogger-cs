@@ -1,4 +1,4 @@
-﻿//using PrinterStatusLogger.CommandHandling;
+﻿using PrinterStatusLogger.Logging;
 using PrinterStatusLogger.Config;
 using PrinterStatusLogger.PrinterManaging;
 
@@ -13,7 +13,7 @@ namespace PrinterStatusLogger
 
         public static bool userMode { private set; get; } = false;
         public static bool noAlertMode { private set; get; } = false;
-        public static bool verboseMode { private set; get; } = false;
+        public static LogType verboseMode { private set; get; } = LogType.INFO;
 
         private static readonly Dictionary<string, Action> s_programArgs = new Dictionary<string, Action>
         {
@@ -21,7 +21,8 @@ namespace PrinterStatusLogger
             { "-u", () => { userMode = true; } },
             { "-na", () => { noAlertMode = true; } },
             { "-m",  ModelListingMode},
-            { "-v", () => { verboseMode = true; } }
+            { "-v", () => { verboseMode = LogType.V_WARNING; } },
+            { "-vv", () => { verboseMode = LogType.V_INFO; } }
         };
 
         /*public static readonly Dictionary<string, UInt16> s_wellKnownPorts = new Dictionary<string, ushort> // Probably not needed
@@ -57,8 +58,8 @@ namespace PrinterStatusLogger
                 Logger.Log(LogType.WARNING, "UserMode is activated. Program will be able to wait for user input!");
             if (noAlertMode)
                 Logger.Log(LogType.WARNING, "NoAlertMode is activated. No alerts will be sent!");
-            if (verboseMode)
-                Logger.Log(LogType.WARNING, "VerboseMode is activated. Program will return more logs.");
+            if (verboseMode < LogType.INFO)
+                Logger.Log(LogType.WARNING, "VerboseMode[" + verboseMode.ToString() + "] is activated. Program will return more logs.");
             /*
              * Program part
              */
