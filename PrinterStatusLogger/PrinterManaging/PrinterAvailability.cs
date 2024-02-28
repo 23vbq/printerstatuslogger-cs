@@ -35,7 +35,6 @@ namespace PrinterStatusLogger.PrinterManaging
 
         private string _address;
         private UInt16 _port;
-        private bool _checked;
 
         public PrinterAvailability(string address, UInt16 port)
         {

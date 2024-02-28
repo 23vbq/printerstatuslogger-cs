@@ -96,7 +96,8 @@ namespace PrinterStatusLogger
             Console.WriteLine("\t-u\tUser Mode - Program can ask user certain things (like creating default config), and wait for user input");
             Console.WriteLine("\t-na\tNo Alert Mode - Disables whole Alerter module");
             Console.WriteLine("\t-m\tModel List - Only lists loaded printer models and then exits");
-            Console.WriteLine("\t-v\tVerbose Mode - Program will return more logs");
+            Console.WriteLine("\t-v\tVerbose Mode [V_WARNING] - Program will return more warning logs");
+            Console.WriteLine("\t-vv\tVerbose Mode [V_WARNING] - Program will return more warning and info logs (lower level than `-v`)");
             Console.WriteLine("\nDocs: https://github.com/23vbq/printerstatuslogger-cs");
             Console.ForegroundColor = ConsoleColor.White;
             Environment.Exit(0);

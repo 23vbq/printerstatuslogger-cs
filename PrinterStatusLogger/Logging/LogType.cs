@@ -2,8 +2,8 @@
 {
     public enum LogType
     {
-        V_INFO, // Low Level
-        V_WARNING,
+        V_INFO, // Lower Level
+        V_WARNING, // Low Level
         INFO,
         WARNING,
         ERROR,

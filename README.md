@@ -24,8 +24,8 @@ Avaliable arguments:
 - `-u` User Mode - Program can ask user certain things (like creating default config), and wait for user input
 - `-na` No Alert Mode - Disables whole Alerter module
 - `-m` Model List - Only lists loaded printer models and then exits
-- `-v` Verbose Mode \[V_WARNING\]- Program will return more warning logs
-- `-vv` Verbose Mode \[V_INFO\]- Program will return more warning and info logs (lower level than `-v`)
+- `-v` Verbose Mode \[V_WARNING\] - Program will return more warning logs
+- `-vv` Verbose Mode \[V_INFO\] - Program will return more warning and info logs (lower level than `-v`)
 
 ## Configuration
 
@@ -83,6 +83,11 @@ readtonerlevelregex=[Regex to find toner level [0-9]{1,3}]
 - ~~Run arguments~~
   - ~~Verbose mode that logs additional info~~
   - ~~Help~~
-- *Config as class*
+- Config improvements
+  - *As a class*
+  - All configs in one file
+  - New options in config
+    - Port open check connection timeout
+    - Enable/Disable pings
 - *ExchangeOnline Server support - in future*
 - *Getting prints counter - in future*
